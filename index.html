@@ -7,21 +7,26 @@
   <meta name="description" content="浅小兮的个人主页" />
   <link rel="icon" type="image/webp" href="https://conversation.cdn.meoo.host/conversations/349158222827081728/image/2026-08-21/1787323301665-favicon_ico.webp?auth_key=ed05eada1c09a1ccc1cc6e669058d547a83f52466266792079ea3d0e3d7f7df4" />
 
-  <!-- ============ 字体 ============ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- ============ 字体（异步加载，避免阻塞渲染） ============ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 
-  <!-- ============ 音乐播放器 CDN ============ -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+  <!-- 预加载首屏关键资源 -->
+  <link rel="preload" href="css/style.css" as="style">
+  <link rel="preload" href="img/avatar.jpg" as="image" fetchpriority="high">
 
-  <!-- ============ Remix Icon CDN ============ -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+  <!-- Remix Icon（异步加载） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css"></noscript>
 
-  <!-- ============ 外链样式 ============ -->
+  <!-- 主样式 -->
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- 音乐播放器（延迟加载） -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <script defer src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
 </head>
 <body>
 
@@ -30,26 +35,26 @@
        ============================================================ -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <!-- 【替换】Logo 文字（见 js/data.js profileData） -->
-      <div class="nav-logo">
-        <span>浅小兮</span>
-      </div>
-
       <div class="nav-links" id="navLinks">
-        <a class="nav-link" data-target="hero">首页</a>
+        <!-- 头像在胶囊首位，悬停显示名字 -->
+        <a class="nav-link nav-avatar" data-target="hero">
+          <img src="img/avatar.jpg" alt="头像" class="nav-avatar-img" />
+          <span class="nav-avatar-text">浅小兮</span>
+        </a>
         <a class="nav-link" data-target="intro">介绍</a>
         <a class="nav-link" data-target="projects">项目</a>
         <a class="nav-link" data-target="timeline">历程</a>
         <a class="nav-link" data-target="music">音乐</a>
         <a class="nav-link" data-target="about">关于</a>
+        <!-- 主题切换在胶囊末尾 -->
+        <button class="nav-link theme-toggle-nav" id="themeToggle" aria-label="切换深色模式">
+          <i class="ri-sun-line icon-sun"></i>
+          <i class="ri-moon-line icon-moon"></i>
+        </button>
         <span class="nav-indicator" id="navIndicator"></span>
       </div>
 
       <div class="nav-actions">
-        <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">
-          <i class="ri-sun-line icon-sun"></i>
-          <i class="ri-moon-line icon-moon"></i>
-        </button>
         <button class="hamburger" id="hamburger" aria-label="菜单">
           <i class="ri-menu-line"></i>
         </button>
@@ -68,9 +73,6 @@
     <a data-target="music">音乐</a>
     <a data-target="about">关于</a>
   </div>
-
-  <!-- 星空容器（仅黑夜模式显示） -->
-  <div class="stars-container" id="starsContainer"></div>
 
   <!-- ============================================================
        Hero 首屏
@@ -95,13 +97,9 @@
           <i class="ri-mail-send-line"></i>
           <span>邮箱</span>
         </a>
-        <a class="social-btn social-pill" href="https://www.douyin.com/963209970" target="_blank" aria-label="抖音">
+        <a class="social-btn social-pill" href="https://www.douyin.com/search/963209970" target="_blank" aria-label="抖音">
           <i class="ri-tiktok-line"></i>
           <span>抖音</span>
-        </a>
-        <a class="social-btn social-pill" href="https://x.com/zxw2963286491" target="_blank" aria-label="X">
-          <i class="ri-twitter-x-line"></i>
-          <span>X</span>
         </a>
         <a class="social-btn social-pill" href="https://qm.qq.com/q/2963286491" target="_blank" aria-label="QQ">
           <i class="ri-qq-line"></i>
@@ -123,7 +121,7 @@
         <!-- 左侧：照片 + 标签小卡片 -->
         <div class="intro-left reveal">
           <div class="intro-photo-card">
-            <img src="img/portrait.jpg" alt="个人形象" />
+            <img src="img/portrait.jpg" alt="个人形象" loading="lazy" />
           </div>
           <div class="intro-tags-card">
             <span class="intro-tag">浅小兮</span>
@@ -143,7 +141,7 @@
         <div class="intro-content-card reveal">
           <div class="intro-text">
             <!-- 【替换】以下占位介绍文本（见 js/data.js introData.paragraphs） -->
-            <p>你好呀，很高兴认识你👋我是<strong>浅小兮</strong>，你也可以称呼<strong>千曦一梦</strong>。一名热爱构建数字产品的开发者——看着一行行代码慢慢长出模样，变成别人能点开、能用上的东西，那种满足感，什么都替代不了。</p>
+            <p>你好呀，很高兴认识你👋我是<strong>浅小兮</strong>，你也可以称呼<strong>千曦一梦</strong>或者<strong>不羡明月知</strong>。一名热爱构建数字产品的开发者——看着一行行代码慢慢长出模样，变成别人能点开、能用上的东西，那种满足感，什么都替代不了。</p>
             <p>我主要关注 <strong>前后端工程</strong> 与 <strong>大数据运维</strong>，总觉得一个舒服的技术实现，得既有靠谱的底子，又有让人眼前一亮的样子。</p>
             <p>不忙的时候，喜欢泡在开源项目里写写改改，在博客里记下踩过的坑和冒出的光，也随手做些小工具，解决生活里那些不起眼的小麻烦。</p>
             <p>最近在学习更多关于 <strong>全栈架构</strong> 和 <strong>AI 应用</strong> 的知识。如果你对同样的领域感兴趣，欢迎随时和我交流。</p>
@@ -244,19 +242,25 @@
                 <!-- 播放控制按钮 -->
                 <div class="music-controls">
                   <button class="music-btn" id="musicPrev" aria-label="上一首">
-                    <i class="ri-skip-back-line"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4C7.55228 4 8 4.44772 8 5V11.3333L18.2227 4.51823C18.4524 4.36506 18.7628 4.42714 18.916 4.65691C18.9708 4.73904 19 4.83555 19 4.93426V19.0657C19 19.3419 18.7761 19.5657 18.5 19.5657C18.4013 19.5657 18.3048 19.5365 18.2227 19.4818L8 12.6667V19C8 19.5523 7.55228 20 7 20C6.44772 20 6 19.5523 6 19V5C6 4.44772 6.44772 4 7 4ZM17 7.73703L10.6056 12L17 16.263V7.73703Z"></path></svg>
                   </button>
                   <button class="music-btn music-btn-play" id="musicPlay" aria-label="播放/暂停">
-                    <i class="ri-play-fill"></i>
+                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 18.3915V5.60846L18.2264 12L8 18.3915ZM6 3.80421V20.1957C6 20.9812 6.86395 21.46 7.53 21.0437L20.6432 12.848C21.2699 12.4563 21.2699 11.5436 20.6432 11.152L7.53 2.95621C6.86395 2.53993 6 3.01878 6 3.80421Z"></path></svg>
+                    <svg class="pause-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5H10V19H6V5ZM14 5H18V19H14V5Z"></path></svg>
                   </button>
                   <button class="music-btn" id="musicNext" aria-label="下一首">
-                    <i class="ri-skip-forward-line"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12.6667L5.77735 19.4818C5.54759 19.6349 5.23715 19.5729 5.08397 19.3431C5.02922 19.261 5 19.1645 5 19.0657V4.93426C5 4.65812 5.22386 4.43426 5.5 4.43426C5.59871 4.43426 5.69522 4.46348 5.77735 4.51823L16 11.3333V5C16 4.44772 16.4477 4 17 4C17.5523 4 18 4.44772 18 5V19C18 19.5523 17.5523 20 17 20C16.4477 20 16 19.5523 16 19V12.6667ZM7 7.73703V16.263L13.3944 12L7 7.73703Z"></path></svg>
                   </button>
                   <!-- 播放模式切换按钮 -->
                   <button class="music-btn music-mode-btn" id="musicMode" aria-label="切换播放模式" data-mode="list">
-                    <i class="ri-repeat-line mode-icon mode-list"></i>
-                    <i class="ri-shuffle-line mode-icon mode-random"></i>
-                    <i class="ri-repeat-one-line mode-icon mode-loop"></i>
+                    <i class="ri-repeat-2-fill mode-icon mode-list"></i>
+                    <i class="ri-shuffle-fill mode-icon mode-random"></i>
+                    <i class="ri-repeat-one-fill mode-icon mode-loop"></i>
+                  </button>
+                  <!-- 平台切换按钮 -->
+                  <button class="music-btn music-platform-btn" id="musicPlatform" aria-label="切换音乐平台">
+                    <svg class="platform-icon platform-netease" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.7134 8.12811L18.4668 8.69379C18.2864 9.10792 17.7136 9.10792 17.5331 8.69379L17.2866 8.12811C16.8471 7.11947 16.0555 6.31641 15.0677 5.87708L14.308 5.53922C13.8973 5.35653 13.8973 4.75881 14.308 4.57612L15.0252 4.25714C16.0384 3.80651 16.8442 2.97373 17.2761 1.93083L17.5293 1.31953C17.7058 0.893489 18.2942 0.893489 18.4706 1.31953L18.7238 1.93083C19.1558 2.97373 19.9616 3.80651 20.9748 4.25714L21.6919 4.57612C22.1027 4.75881 22.1027 5.35653 21.6919 5.53922L20.9323 5.87708C19.9445 6.31641 19.1529 7.11947 18.7134 8.12811ZM7 3H12V5H9V17C9 19.2091 7.20914 21 5 21C2.79086 21 1 19.2091 1 17C1 14.7909 2.79086 13 5 13C5.72857 13 6.41165 13.1948 7 13.5351V3ZM18 13.5351V11H20V17C20 19.2091 18.2091 21 16 21C13.7909 21 12 19.2091 12 17C12 14.7909 13.7909 13 16 13C16.7286 13 17.4117 13.1948 18 13.5351ZM5 19C6.10457 19 7 18.1046 7 17C7 15.8954 6.10457 15 5 15C3.89543 15 3 15.8954 3 17C3 18.1046 3.89543 19 5 19ZM16 19C17.1046 19 18 18.1046 18 17C18 15.8954 17.1046 15 16 15C14.8954 15 14 15.8954 14 17C14 18.1046 14.8954 19 16 19Z"></path></svg>
+                    <svg class="platform-icon platform-tencent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.7134 8.12811L18.4668 8.69379C18.2864 9.10792 17.7136 9.10792 17.5331 8.69379L17.2866 8.12811C16.8471 7.11947 16.0555 6.31641 15.0677 5.87708L14.308 5.53922C13.8973 5.35653 13.8973 4.75881 14.308 4.57612L15.0252 4.25714C16.0384 3.80651 16.8442 2.97373 17.2761 1.93083L17.5293 1.31953C17.7058 0.893489 18.2942 0.893489 18.4706 1.31953L18.7238 1.93083C19.1558 2.97373 19.9616 3.80651 20.9748 4.25714L21.6919 4.57612C22.1027 4.75881 22.1027 5.35653 21.6919 5.53922L20.9323 5.87708C19.9445 6.31641 19.1529 7.11947 18.7134 8.12811ZM7 3H12V5H9V17C9 19.2091 7.20914 21 5 21C2.79086 21 1 19.2091 1 17C1 14.7909 2.79086 13 5 13C5.72857 13 6.41165 13.1948 7 13.5351V3ZM18 13.5351V11H20V17C20 19.2091 18.2091 21 16 21C13.7909 21 12 19.2091 12 17C12 14.7909 13.7909 13 16 13C16.7286 13 17.4117 13.1948 18 13.5351ZM5 19C6.10457 19 7 18.1046 7 17C7 15.8954 6.10457 15 5 15C3.89543 15 3 15.8954 3 17C3 18.1046 3.89543 19 5 19ZM16 19C17.1046 19 18 18.1046 18 17C18 15.8954 17.1046 15 16 15C14.8954 15 14 15.8954 14 17C14 18.1046 14.8954 19 16 19Z"></path></svg>
                   </button>
                 </div>
               </div>
@@ -302,23 +306,14 @@
       <div class="gallery-section reveal" id="gallery">
         <div class="gallery-container">
           <div class="gallery-track" id="galleryTrack">
-            <div class="gallery-item" data-full="img/photos01.jpg"><img src="img/photos01.jpg" alt="图片1" /></div>
-            <div class="gallery-item" data-full="img/photos02.jpg"><img src="img/photos02.jpg" alt="图片2" /></div>
-            <div class="gallery-item" data-full="img/photos03.jpg"><img src="img/photos03.jpg" alt="图片3" /></div>
-            <div class="gallery-item" data-full="img/photos04.jpg"><img src="img/photos04.jpg" alt="图片4" /></div>
-            <div class="gallery-item" data-full="img/photos05.jpg"><img src="img/photos05.jpg" alt="图片5" /></div>
-            <div class="gallery-item" data-full="img/photos06.jpg"><img src="img/photos06.jpg" alt="图片6" /></div>
-            <div class="gallery-item" data-full="img/photos07.jpg"><img src="img/photos07.jpg" alt="图片7" /></div>
-            <div class="gallery-item" data-full="img/photos08.jpg"><img src="img/photos08.jpg" alt="图片8" /></div>
-            <!-- 复制一份用于无缝循环 -->
-            <div class="gallery-item" data-full="img/photos01.jpg"><img src="img/photos01.jpg" alt="图片1" /></div>
-            <div class="gallery-item" data-full="img/photos02.jpg"><img src="img/photos02.jpg" alt="图片2" /></div>
-            <div class="gallery-item" data-full="img/photos03.jpg"><img src="img/photos03.jpg" alt="图片3" /></div>
-            <div class="gallery-item" data-full="img/photos04.jpg"><img src="img/photos04.jpg" alt="图片4" /></div>
-            <div class="gallery-item" data-full="img/photos05.jpg"><img src="img/photos05.jpg" alt="图片5" /></div>
-            <div class="gallery-item" data-full="img/photos06.jpg"><img src="img/photos06.jpg" alt="图片6" /></div>
-            <div class="gallery-item" data-full="img/photos07.jpg"><img src="img/photos07.jpg" alt="图片7" /></div>
-            <div class="gallery-item" data-full="img/photos08.jpg"><img src="img/photos08.jpg" alt="图片8" /></div>
+            <div class="gallery-item" data-full="img/photos01.webp"><img src="img/photos01.webp" alt="图片1" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos02.webp"><img src="img/photos02.webp" alt="图片2" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos03.webp"><img src="img/photos03.webp" alt="图片3" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos04.webp"><img src="img/photos04.webp" alt="图片4" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos05.webp"><img src="img/photos05.webp" alt="图片5" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos06.webp"><img src="img/photos06.webp" alt="图片6" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos07.webp"><img src="img/photos07.webp" alt="图片7" loading="lazy" /></div>
+            <div class="gallery-item" data-full="img/photos08.webp"><img src="img/photos08.webp" alt="图片8" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -414,11 +409,11 @@
     </div>
   </footer>
 
-  <!-- ============ 外链脚本（顺序：data → main → music） ============ -->
-  <script src="js/data.js"></script>
+  <!-- 主脚本（data + main 合并） -->
   <script src="js/main.js"></script>
-  <script src="js/music.js"></script>
-  <!-- 今日诗词 SDK -->
-  <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+  <!-- 音乐模块（延迟加载） -->
+  <script defer src="js/music.js"></script>
+  <!-- 今日诗词 SDK（延迟加载，不阻塞） -->
+  <script async src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
 </body>
 </html>
