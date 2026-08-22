@@ -1266,7 +1266,7 @@ footer {
 
   .lightbox-left {
     position: relative;
-    flex: 0 0 70%;
+    flex: 0 0 60%;
     min-height: 0;
     background: #000;
     display: flex;
@@ -1312,7 +1312,7 @@ footer {
   }
 
   .lightbox-right {
-    flex: 0 0 30%;
+    flex: 0 0 40%;
     min-height: 0;
     padding: 16px 20px;
     writing-mode: horizontal-tb;
