@@ -1,0 +1,13 @@
+{
+  "name": "personal-homepage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "浅小兮的个人主页",
+  "scripts": {
+    "dev": "vite --port 3015 --host",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
