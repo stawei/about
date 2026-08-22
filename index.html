@@ -318,35 +318,6 @@
         </div>
       </div>
 
-      <!-- 全屏图片查看器 - 左右分栏：左图右文 -->
-      <div class="lightbox" id="lightbox">
-        <div class="lightbox-overlay"></div>
-        <div class="lightbox-content">
-          <div class="lightbox-left">
-            <img class="lightbox-img" id="lightboxImg" src="" alt="全屏图片" />
-          </div>
-          <div class="lightbox-right">
-            <h3 class="lightbox-title" id="lightboxTitle">图片标题</h3>
-            <p class="lightbox-desc" id="lightboxDesc">这里是图片的详细介绍文字，可以描述图片的内容、拍摄背景、意义等信息。</p>
-            <div class="lightbox-meta">
-              <span class="lightbox-date">2024年拍摄</span>
-              <span class="lightbox-tag">生活记录</span>
-            </div>
-            <!-- 切换按钮区域 -->
-            <div class="lightbox-nav-container">
-              <button class="lightbox-nav-btn lightbox-prev-btn" id="lightboxPrev" aria-label="上一张">
-                <i class="ri-arrow-left-s-line"></i>
-                <span>上一张</span>
-              </button>
-              <button class="lightbox-nav-btn lightbox-next-btn" id="lightboxNext" aria-label="下一张">
-                <span>下一张</span>
-                <i class="ri-arrow-right-s-line"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <button class="lightbox-close" id="lightboxClose" aria-label="关闭">&times;</button>
-      </div>
     </div>
   </section>
 
@@ -408,6 +379,46 @@
       <p>© 2023-2026 浅小兮 · Powered by <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
     </div>
   </footer>
+
+  <!-- ============================================================
+       全屏图片查看器 - 左右分栏：左图右文
+       放在 body 末尾确保在最顶层
+       ============================================================ -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-overlay"></div>
+    <div class="lightbox-content">
+      <div class="lightbox-left">
+        <img class="lightbox-img" id="lightboxImg" src="" alt="全屏图片" />
+        <!-- 左右切换箭头 -->
+        <button class="lightbox-arrow lightbox-arrow-left" id="lightboxArrowPrev" aria-label="上一张">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <button class="lightbox-arrow lightbox-arrow-right" id="lightboxArrowNext" aria-label="下一张">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+      <div class="lightbox-right">
+        <h3 class="lightbox-title" id="lightboxTitle">图片标题</h3>
+        <p class="lightbox-desc" id="lightboxDesc">这里是图片的详细介绍文字，可以描述图片的内容、拍摄背景、意义等信息。</p>
+        <div class="lightbox-meta">
+          <span class="lightbox-date">2024年拍摄</span>
+          <span class="lightbox-tag">生活记录</span>
+        </div>
+        <!-- 切换按钮区域 -->
+        <div class="lightbox-nav-container">
+          <button class="lightbox-nav-btn lightbox-prev-btn" id="lightboxPrev" aria-label="上一张">
+            <i class="ri-arrow-left-s-line"></i>
+            <span>上一张</span>
+          </button>
+          <button class="lightbox-nav-btn lightbox-next-btn" id="lightboxNext" aria-label="下一张">
+            <span>下一张</span>
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button class="lightbox-close" id="lightboxClose" aria-label="关闭">&times;</button>
+  </div>
 
   <!-- 主脚本（data + main 合并） -->
   <script src="js/main.js"></script>

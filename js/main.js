@@ -266,14 +266,16 @@ const musicConfig = {
   }
 
   /* ============================================================
-     9. 项目渲染（使用 projectsData）
+     9. 项目渲染（使用 projectsData）- 双份渲染实现无缝循环
      ============================================================ */
   function renderProjects() {
     var track = document.getElementById('projectsTrack');
     if (!track) return;
     var data = (typeof projectsData !== 'undefined' && projectsData.length) ? projectsData : [];
-    // 生成项目卡片HTML
-    var cardsHtml = data.map(function (p) {
+    if (data.length === 0) return;
+
+    // 生成单个项目卡片的HTML
+    function createCardHtml(p) {
       var techHtml = p.tech.map(function (t) {
         return '<span class="tech-tag">' + t + '</span>';
       }).join('');
@@ -291,8 +293,12 @@ const musicConfig = {
           '</div>' +
         '</div>'
       );
-    }).join('');
-    track.innerHTML = cardsHtml;
+    }
+
+    // 渲染双份卡片实现无缝循环
+    var cardsHtml = data.map(createCardHtml).join('');
+    var cardsHtmlDouble = cardsHtml + cardsHtml;
+    track.innerHTML = cardsHtmlDouble;
   }
 
   /* ============================================================
@@ -510,6 +516,8 @@ const musicConfig = {
     var lightboxClose = document.getElementById('lightboxClose');
     var lightboxPrev = document.getElementById('lightboxPrev');
     var lightboxNext = document.getElementById('lightboxNext');
+    var lightboxArrowPrev = document.getElementById('lightboxArrowPrev');
+    var lightboxArrowNext = document.getElementById('lightboxArrowNext');
     var galleryItems = document.querySelectorAll('.gallery-item');
 
     if (!lightbox || !lightboxImg) return;
@@ -565,20 +573,38 @@ const musicConfig = {
       updateLightbox(currentIndex);
     }
 
+    // 打开全屏
+    function openLightbox(index) {
+      currentIndex = index % totalImages;
+      updateLightbox(currentIndex);
+      lightbox.classList.add('active');
+      // 禁止页面滚动并固定位置
+      var scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '-' + scrollY + 'px';
+      document.body.dataset.scrollY = scrollY;
+    }
+
     // 点击图片打开全屏
     galleryItems.forEach(function (item, index) {
       item.addEventListener('click', function () {
-        currentIndex = index % totalImages;
-        updateLightbox(currentIndex);
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        openLightbox(index);
       });
     });
 
     // 关闭全屏
     function closeLightbox() {
       lightbox.classList.remove('active');
+      // 恢复页面滚动
+      var scrollY = document.body.dataset.scrollY || 0;
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      // 恢复滚动位置
+      window.scrollTo(0, parseInt(scrollY));
       lightboxImg.src = '';
     }
 
@@ -586,7 +612,7 @@ const musicConfig = {
       lightboxClose.addEventListener('click', closeLightbox);
     }
 
-    // 上一张按钮
+    // 上一张按钮（文字区域）
     if (lightboxPrev) {
       lightboxPrev.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -594,9 +620,24 @@ const musicConfig = {
       });
     }
 
-    // 下一张按钮
+    // 下一张按钮（文字区域）
     if (lightboxNext) {
       lightboxNext.addEventListener('click', function (e) {
+        e.stopPropagation();
+        showNext();
+      });
+    }
+
+    // 左右箭头按钮（图片区域）
+    if (lightboxArrowPrev) {
+      lightboxArrowPrev.addEventListener('click', function (e) {
+        e.stopPropagation();
+        showPrev();
+      });
+    }
+
+    if (lightboxArrowNext) {
+      lightboxArrowNext.addEventListener('click', function (e) {
         e.stopPropagation();
         showNext();
       });

@@ -55,41 +55,78 @@ function parseLRC(lrc) {
   return result.sort((a, b) => a.time - b.time);
 }
 
-/** 从指定平台获取歌单数据 */
+/** API 源配置 - 按平台区分 */
+const API_SOURCES = {
+  netease: ['https://met.api.xiaoguan.fit/api', 'https://api.moeyao.cn/meting/', 'https://api.qijieya.cn/meting/'],
+  tencent: ['https://meting.mikus.ink/api', 'https://api.qijieya.cn/meting/']
+};
+
+/** 从指定平台获取歌单数据（带备用源） */
 async function fetchPlaylist(server, type, id) {
-  try {
-    const res = await fetch(`https://api.i-meto.com/meting/api?server=${server}&type=${type}&id=${id}`);
-    if (!res.ok) throw new Error(`获取${server}歌单失败: ${res.status}`);
-    const data = await res.json();
-    return data
-      .filter(item => item.url && item.url.trim() !== '')
-      .map(item => ({
-        name: item.title || '未知歌曲',
-        artist: item.author || '未知歌手',
-        url: item.url,
-        cover: item.pic,
-        lrc: item.lrc || '',
-        server: server,
-        rawId: item.id || item.songid || ''
-      }));
-  } catch (err) {
-    console.error(`[Music] 获取${server}歌单失败:`, err);
-    return [];
+  // 根据平台选择对应的 API 源
+  const sources = API_SOURCES[server] || API_SOURCES.netease;
+  for (let i = 0; i < sources.length; i++) {
+    const apiUrl = sources[i];
+    try {
+      const res = await fetch(`${apiUrl}?server=${server}&type=${type}&id=${id}`);
+      if (!res.ok) throw new Error(`获取${server}歌单失败: ${res.status}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        console.log(`[Music] 使用 API 源 ${i + 1}: ${apiUrl}`);
+        return data
+          .filter(item => item.url && item.url.trim() !== '')
+          .map(item => {
+            // 从 URL 中提取歌曲 ID（兼容 api.qijieya.cn 等源）
+            let rawId = item.id || item.songid || item.songmid || '';
+            if (!rawId && item.url) {
+              const match = item.url.match(/[?&]id=([^&]+)/);
+              if (match) rawId = match[1];
+            }
+            return {
+              name: item.title || item.name || '未知歌曲',
+              artist: item.author || item.artist || '未知歌手',
+              url: item.url,
+              cover: item.pic,
+              lrc: item.lrc || '',
+              server: server,
+              rawId: rawId
+            };
+          });
+      }
+    } catch (err) {
+      console.warn(`[Music] API 源 ${i + 1} 失败:`, apiUrl, err.message);
+    }
   }
+  console.error(`[Music] 所有 API 源均失败`);
+  return [];
 }
 
-/** 按需重新获取歌曲的播放 URL（带缓存破坏） */
+/** 按需重新获取歌曲的播放 URL（带缓存破坏和备用源） */
 async function refreshSongUrl(song) {
   if (!song.rawId || !song.server) return null;
-  try {
-    const res = await fetch(`https://api.i-meto.com/meting/api?server=${song.server}&type=url&id=${song.rawId}&r=${Date.now()}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const urlData = Array.isArray(data) ? data[0] : data;
-    return (urlData?.url?.trim()) ? urlData.url : null;
-  } catch {
-    return null;
+  // 根据平台选择对应的 API 源
+  const sources = API_SOURCES[song.server] || API_SOURCES.netease;
+  for (const apiUrl of sources) {
+    try {
+      const res = await fetch(`${apiUrl}?server=${song.server}&type=url&id=${song.rawId}&r=${Date.now()}`);
+      if (!res.ok) continue;
+
+      // 处理 302 重定向（如 meting.mikus.ink）
+      if (res.redirected || res.status === 302) {
+        return res.url;
+      }
+
+      // 处理 JSON 响应（如 api.qijieya.cn）
+      const data = await res.json();
+      const urlData = Array.isArray(data) ? data[0] : data;
+      if (urlData?.url?.trim()) {
+        return urlData.url;
+      }
+    } catch {
+      // 继续尝试下一个源
+    }
   }
+  return null;
 }
 
 /** 统一的错误恢复：刷新 URL → 重试播放 → 失败则跳下一首 */
