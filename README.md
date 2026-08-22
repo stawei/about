@@ -2,6 +2,7 @@
 
 ## 项目类型
 浅小兮的静态个人主页
+![关于我的项目照片](https://free.picui.cn/free/2026/08/22/6a892ec572f60.png)
 
 ## 技术栈
 - 纯 HTML + CSS + 原生 JavaScript（零框架依赖）
