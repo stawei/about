@@ -2,8 +2,6 @@
 <html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
-  <script>LA.init({id:"3JAXtAJGJkeEi3pd",ck:"3JAXtAJGJkeEi3pd"})</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>浅小兮的个人主页</title>
   <meta name="description" content="浅小兮的个人主页" />
@@ -46,8 +44,8 @@
         <a class="nav-link" data-target="intro">介绍</a>
         <a class="nav-link" data-target="projects">项目</a>
         <a class="nav-link" data-target="timeline">历程</a>
-        <a class="nav-link" data-target="music">音乐</a>
         <a class="nav-link" data-target="about">关于</a>
+        <a class="nav-link" data-target="gallery">图展</a>
         <!-- 主题切换在胶囊末尾 -->
         <button class="nav-link theme-toggle-nav" id="themeToggle" aria-label="切换深色模式">
           <i class="ri-sun-line icon-sun"></i>
@@ -67,13 +65,13 @@
   <!-- 移动端抽屉 -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <div class="drawer" id="drawer">
-    <button class="drawer-close" id="drawerClose" aria-label="关闭">×</button>
+    <button class="drawer-close" id="drawerClose" aria-label="关闭"><i class="ri-close-line" aria-hidden="true"></i></button>
     <a data-target="hero">首页</a>
     <a data-target="intro">介绍</a>
     <a data-target="projects">项目</a>
     <a data-target="timeline">历程</a>
-    <a data-target="music">音乐</a>
     <a data-target="about">关于</a>
+    <a data-target="gallery">图展</a>
   </div>
 
   <!-- ============================================================
@@ -81,33 +79,34 @@
        ============================================================ -->
   <section id="hero">
     <div class="container">
-      <!-- 【替换】头像图片 src（见 js/data.js profileData.avatar） -->
-      <img class="hero-avatar" src="img/avatar.jpg" alt="头像" />
+      <!-- 头像 + 下方状态条（时间 · 地点） -->
+      <div class="hero-avatar-wrap">
+        <!-- 【替换】头像图片 src（本地图片留在 HTML，构建时由 Vite 哈希；音乐封面回退取此 src） -->
+        <img class="hero-avatar" src="img/avatar.jpg" alt="头像" />
+        <div class="hero-meta" aria-label="当前时间、来访地点与天气">
+          <span id="heroTime">--:--</span>
+          <span class="hero-meta-dot">·</span>
+          <span id="heroCity">定位中…</span>
+          <span class="hero-meta-dot hero-weather-sep" hidden>·</span>
+          <span id="heroWeather" hidden></span>
+        </div>
+      </div>
+      <div class="hero-text">
       <h1 class="hero-title">你好，我是<span style="color:var(--primary)"> 浅小兮 </span></h1>
       <div class="hero-typewriter"><span id="typewriter"></span><span class="cursor"></span></div>
-      <div class="hero-socials">
-        <!-- 【替换】社交链接 href（见 js/data.js profileData.socials） -->
-        <a class="social-btn social-pill" href="https://github.com/stawei" target="_blank" aria-label="GitHub">
-          <i class="ri-github-fill"></i>
-          <span>GitHub</span>
-        </a>
-        <a class="social-btn social-pill" href="https://space.bilibili.com/516107164" target="_blank" aria-label="Bilibili">
-          <i class="ri-bilibili-fill"></i>
-          <span>B站</span>
-        </a>
-        <a class="social-btn social-pill" href="mailto:2963286491@qq.com" aria-label="Email">
-          <i class="ri-mail-send-line"></i>
-          <span>邮箱</span>
-        </a>
-        <a class="social-btn social-pill" href="https://www.douyin.com/search/963209970" target="_blank" aria-label="抖音">
-          <i class="ri-tiktok-line"></i>
-          <span>抖音</span>
-        </a>
-        <a class="social-btn social-pill" href="https://qm.qq.com/q/2963286491" target="_blank" aria-label="QQ">
-          <i class="ri-qq-line"></i>
-          <span>QQ</span>
-        </a>
+      <!-- 今日诗词卡片（原位于「关于我」左栏，移至打字机下方） -->
+      <div class="intro-poem-card">
+        <span id="jinrishici-sentence">正在加载今日诗词....</span>
       </div>
+      <!-- 前往博客胶囊（与 .social-btn 同材质同尺寸） -->
+      <a class="hero-blog-btn" href="https://zxwlove.xyz" target="_blank" rel="noopener noreferrer">
+        <i class="ri-star-smile-line"></i>
+        <span>前往博客</span>
+        <i class="ri-arrow-right-up-line hero-blog-arrow"></i>
+      </a>
+      </div>
+      <!-- 社交按钮：由 js/main.js profileData.socials 渲染（.hero-socials 以 flex-basis:100% 独占一行居中） -->
+      <div class="hero-socials" id="heroSocials"></div>
     </div>
   </section>
 
@@ -116,8 +115,10 @@
        ============================================================ -->
   <section id="intro">
     <div class="container">
-      <h2 class="section-title reveal">关于我</h2>
-      <p class="section-subtitle reveal">一些关于我的故事</p>
+      <div class="section-head reveal">
+        <h2 class="section-title">关于我</h2>
+        <p class="section-subtitle">一些关于我的故事</p>
+      </div>
 
       <div class="intro-grid">
         <!-- 左侧：照片 + 标签小卡片 -->
@@ -125,59 +126,29 @@
           <div class="intro-photo-card">
             <img src="img/portrait.jpg" alt="个人形象" loading="lazy" />
           </div>
-          <div class="intro-tags-card">
-            <span class="intro-tag">浅小兮</span>
-            <span class="intro-tag">千曦一梦</span>
-            <span class="intro-tag">多喜乐，常安宁</span>
-            <span class="intro-tag">zxwlove</span>
+          <div class="intro-tags-card" id="introTags">
+            <!-- 【替换】标签内容见 js/main.js introData.tags；'@location' 占位为访客城市标签，由 fetchLocation() 填充 -->
             <span class="intro-tag" id="locationTag"> 加载中...</span>
-            <span class="intro-tag">相遇的刹那开始就注定了别离</span>
-          </div>
-          <!-- 今日诗词卡片 -->
-          <div class="intro-poem-card">
-            <span id="jinrishici-sentence">正在加载今日诗词....</span>
           </div>
         </div>
 
         <!-- 右侧：自我介绍内容容器 -->
         <div class="intro-content-card reveal">
           <div class="intro-text">
-            <!-- 【替换】以下占位介绍文本（见 js/data.js introData.paragraphs） -->
-            <p>你好呀，很高兴认识你👋我是<strong>浅小兮</strong>，你也可以称呼<strong>千曦一梦</strong>或者<strong>不羡明月知</strong>。一名热爱构建数字产品的开发者——看着一行行代码慢慢长出模样，变成别人能点开、能用上的东西，那种满足感，什么都替代不了。</p>
-            <p>我主要关注 <strong>前后端工程</strong> 与 <strong>大数据运维</strong>，总觉得一个舒服的技术实现，得既有靠谱的底子，又有让人眼前一亮的样子。</p>
-            <p>不忙的时候，喜欢泡在开源项目里写写改改，在博客里记下踩过的坑和冒出的光，也随手做些小工具，解决生活里那些不起眼的小麻烦。</p>
-            <p>最近在学习更多关于 <strong>全栈架构</strong> 和 <strong>AI 应用</strong> 的知识。如果你对同样的领域感兴趣，欢迎随时和我交流。</p>
-            <p>除了写代码，我也喜欢 <strong>音乐</strong>、<strong>阅读</strong> 和 <strong>刷抖音</strong>，当然偶尔也会<strong>运动</strong>一下下的，这些细碎的爱好让生活不至于太紧绷，也常常给我送来意想不到的灵感。</p>
+            <!-- 【替换】介绍段落与技能标签均由 js/main.js 的 introData 渲染（paragraphs / skills） -->
+            <div class="skill-cloud"></div>
 
-            <!-- 【替换】技能标签（见 js/data.js introData.skills） -->
-            <div class="skill-cloud">
-              <span class="skill-pill" data-level="70%">Java</span>
-              <span class="skill-pill" data-level="95%">TypeScript</span>
-              <span class="skill-pill" data-level="90%">JavaScript</span>
-              <span class="skill-pill" data-level="80%">React</span>
-              <span class="skill-pill" data-level="75%">Node.js</span>
-              <span class="skill-pill" data-level="70%">Python</span>
-              <span class="skill-pill" data-level="65%">Docker</span>
-              <span class="skill-pill" data-level="90%">Git</span>
-              <span class="skill-pill" data-level="70%">Msql</span>
-              <span class="skill-pill" data-level="65%">Hive</span>
+            <!-- 技能掌握度计量条：悬停上方技能标签时填充到该标签 data-level -->
+            <div class="skill-meter" id="skillMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="技能掌握度">
+              <div class="skill-meter-head">
+                <span class="skill-meter-name">悬停技能查看掌握度</span>
+                <span class="skill-meter-val">--</span>
+              </div>
+              <div class="skill-meter-track">
+                <div class="skill-meter-fill"></div>
+              </div>
             </div>
 
-            <!-- 数据统计 -->
-            <div class="stats-row">
-              <div class="stat-card">
-                <div class="stat-num">4</div>
-                <div class="stat-label">个项目</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-num">4</div>
-                <div class="stat-label">年学习</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-num">∞</div>
-                <div class="stat-label">热情</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -185,12 +156,14 @@
   </section>
 
   <!-- ============================================================
-       项目（由 main.js 动态渲染，数据见 js/data.js projectsData）
+       项目（由 main.js 动态渲染，数据见 js/main.js projectsData）
        ============================================================ -->
   <section id="projects">
     <div class="container">
-      <h2 class="section-title reveal">项目</h2>
-      <p class="section-subtitle reveal">一些我做过的东西</p>
+      <div class="section-head reveal">
+        <h2 class="section-title">项目</h2>
+        <p class="section-subtitle">一些我做过的东西</p>
+      </div>
       <!-- 项目轮播 - 横向滚动展示 -->
       <div class="projects-carousel reveal" id="projectsCarousel">
         <div class="projects-track" id="projectsTrack"></div>
@@ -199,100 +172,28 @@
   </section>
 
   <!-- ============================================================
-       成长历程（由 main.js 动态渲染，数据见 js/data.js timelineData）
+       成长历程（由 main.js 动态渲染，数据见 js/main.js timelineData）
        ============================================================ -->
   <section id="timeline">
     <div class="container">
-      <h2 class="section-title reveal">成长历程</h2>
-      <p class="section-subtitle reveal">一路走来的脚印</p>
+      <div class="section-head reveal">
+        <h2 class="section-title">成长历程</h2>
+        <p class="section-subtitle">一路走来的脚印</p>
+      </div>
       <div class="timeline" id="timelineList"></div>
     </div>
   </section>
 
-  <!-- ============================================================
-       音乐（JS 初始化播放器，配置见 js/data.js musicConfig）
-       ============================================================ -->
-  <section id="music" class="music-section">
-    <div class="container">
-      <h2 class="section-title reveal">音乐</h2>
-      <p class="section-subtitle reveal">写代码时常听的歌单</p>
-      <div class="music-player-card reveal">
-        <div class="music-layout">
-          <!-- 左侧区域（上下两部分） -->
-          <div class="music-left-area">
-            <!-- 左上：专辑封面 + 播放控制台 -->
-            <div class="music-left-top">
-              <!-- 专辑封面 -->
-              <div class="music-cover-wrapper">
-                <img class="music-cover" id="musicCover" src="" alt="封面">
-                <div class="music-cover-glow"></div>
-              </div>
-              <!-- 播放控制台 -->
-              <div class="music-controls-panel">
-                <h3 class="music-song-name" id="musicSongName">--</h3>
-                <p class="music-artist" id="musicArtist">--</p>
-                <!-- 进度条 -->
-                <div class="music-progress-wrapper">
-                  <div class="music-progress-bar" id="musicProgressBar">
-                    <div class="music-progress-fill" id="musicProgressFill"></div>
-                  </div>
-                  <div class="music-time">
-                    <span id="musicCurrentTime">0:00</span>
-                    <span id="musicDuration">0:00</span>
-                  </div>
-                </div>
-                <!-- 播放控制按钮 -->
-                <div class="music-controls">
-                  <button class="music-btn" id="musicPrev" aria-label="上一首">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4C7.55228 4 8 4.44772 8 5V11.3333L18.2227 4.51823C18.4524 4.36506 18.7628 4.42714 18.916 4.65691C18.9708 4.73904 19 4.83555 19 4.93426V19.0657C19 19.3419 18.7761 19.5657 18.5 19.5657C18.4013 19.5657 18.3048 19.5365 18.2227 19.4818L8 12.6667V19C8 19.5523 7.55228 20 7 20C6.44772 20 6 19.5523 6 19V5C6 4.44772 6.44772 4 7 4ZM17 7.73703L10.6056 12L17 16.263V7.73703Z"></path></svg>
-                  </button>
-                  <button class="music-btn music-btn-play" id="musicPlay" aria-label="播放/暂停">
-                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 18.3915V5.60846L18.2264 12L8 18.3915ZM6 3.80421V20.1957C6 20.9812 6.86395 21.46 7.53 21.0437L20.6432 12.848C21.2699 12.4563 21.2699 11.5436 20.6432 11.152L7.53 2.95621C6.86395 2.53993 6 3.01878 6 3.80421Z"></path></svg>
-                    <svg class="pause-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5H10V19H6V5ZM14 5H18V19H14V5Z"></path></svg>
-                  </button>
-                  <button class="music-btn" id="musicNext" aria-label="下一首">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12.6667L5.77735 19.4818C5.54759 19.6349 5.23715 19.5729 5.08397 19.3431C5.02922 19.261 5 19.1645 5 19.0657V4.93426C5 4.65812 5.22386 4.43426 5.5 4.43426C5.59871 4.43426 5.69522 4.46348 5.77735 4.51823L16 11.3333V5C16 4.44772 16.4477 4 17 4C17.5523 4 18 4.44772 18 5V19C18 19.5523 17.5523 20 17 20C16.4477 20 16 19.5523 16 19V12.6667ZM7 7.73703V16.263L13.3944 12L7 7.73703Z"></path></svg>
-                  </button>
-                  <!-- 播放模式切换按钮 -->
-                  <button class="music-btn music-mode-btn" id="musicMode" aria-label="切换播放模式" data-mode="list">
-                    <i class="ri-repeat-2-fill mode-icon mode-list"></i>
-                    <i class="ri-shuffle-fill mode-icon mode-random"></i>
-                    <i class="ri-repeat-one-fill mode-icon mode-loop"></i>
-                  </button>
-                  <!-- 平台切换按钮 -->
-                  <button class="music-btn music-platform-btn" id="musicPlatform" aria-label="切换音乐平台">
-                    <svg class="platform-icon platform-netease" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.7134 8.12811L18.4668 8.69379C18.2864 9.10792 17.7136 9.10792 17.5331 8.69379L17.2866 8.12811C16.8471 7.11947 16.0555 6.31641 15.0677 5.87708L14.308 5.53922C13.8973 5.35653 13.8973 4.75881 14.308 4.57612L15.0252 4.25714C16.0384 3.80651 16.8442 2.97373 17.2761 1.93083L17.5293 1.31953C17.7058 0.893489 18.2942 0.893489 18.4706 1.31953L18.7238 1.93083C19.1558 2.97373 19.9616 3.80651 20.9748 4.25714L21.6919 4.57612C22.1027 4.75881 22.1027 5.35653 21.6919 5.53922L20.9323 5.87708C19.9445 6.31641 19.1529 7.11947 18.7134 8.12811ZM7 3H12V5H9V17C9 19.2091 7.20914 21 5 21C2.79086 21 1 19.2091 1 17C1 14.7909 2.79086 13 5 13C5.72857 13 6.41165 13.1948 7 13.5351V3ZM18 13.5351V11H20V17C20 19.2091 18.2091 21 16 21C13.7909 21 12 19.2091 12 17C12 14.7909 13.7909 13 16 13C16.7286 13 17.4117 13.1948 18 13.5351ZM5 19C6.10457 19 7 18.1046 7 17C7 15.8954 6.10457 15 5 15C3.89543 15 3 15.8954 3 17C3 18.1046 3.89543 19 5 19ZM16 19C17.1046 19 18 18.1046 18 17C18 15.8954 17.1046 15 16 15C14.8954 15 14 15.8954 14 17C14 18.1046 14.8954 19 16 19Z"></path></svg>
-                    <svg class="platform-icon platform-tencent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.7134 8.12811L18.4668 8.69379C18.2864 9.10792 17.7136 9.10792 17.5331 8.69379L17.2866 8.12811C16.8471 7.11947 16.0555 6.31641 15.0677 5.87708L14.308 5.53922C13.8973 5.35653 13.8973 4.75881 14.308 4.57612L15.0252 4.25714C16.0384 3.80651 16.8442 2.97373 17.2761 1.93083L17.5293 1.31953C17.7058 0.893489 18.2942 0.893489 18.4706 1.31953L18.7238 1.93083C19.1558 2.97373 19.9616 3.80651 20.9748 4.25714L21.6919 4.57612C22.1027 4.75881 22.1027 5.35653 21.6919 5.53922L20.9323 5.87708C19.9445 6.31641 19.1529 7.11947 18.7134 8.12811ZM7 3H12V5H9V17C9 19.2091 7.20914 21 5 21C2.79086 21 1 19.2091 1 17C1 14.7909 2.79086 13 5 13C5.72857 13 6.41165 13.1948 7 13.5351V3ZM18 13.5351V11H20V17C20 19.2091 18.2091 21 16 21C13.7909 21 12 19.2091 12 17C12 14.7909 13.7909 13 16 13C16.7286 13 17.4117 13.1948 18 13.5351ZM5 19C6.10457 19 7 18.1046 7 17C7 15.8954 6.10457 15 5 15C3.89543 15 3 15.8954 3 17C3 18.1046 3.89543 19 5 19ZM16 19C17.1046 19 18 18.1046 18 17C18 15.8954 17.1046 15 16 15C14.8954 15 14 15.8954 14 17C14 18.1046 14.8954 19 16 19Z"></path></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <!-- 左下：滚动歌词 -->
-            <div class="music-left-bottom">
-              <div class="music-lyrics" id="musicLyrics">
-                <div class="music-lyrics-content" id="musicLyricsContent">加载中...</div>
-              </div>
-            </div>
-          </div>
-          <!-- 右侧：播放列表（全列） -->
-          <div class="music-right">
-            <div class="music-playlist-header">播放列表</div>
-            <div class="music-playlist-items" id="musicPlaylistItems">
-              <!-- 播放列表项由 JS 动态生成 -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  
   <!-- ============================================================
        关于（心路历程）
        ============================================================ -->
   <section id="about">
     <div class="container">
-      <h2 class="section-title reveal">关于</h2>
-      <p class="section-subtitle reveal">写作与成长的思考</p>
+      <div class="section-head reveal">
+        <h2 class="section-title">关于</h2>
+        <p class="section-subtitle">写作与成长的思考</p>
+      </div>
       <div class="music-related-card reveal">
         <p class="music-related-text">写作对我的学习和成长产生了深远的影响。首先，它促使我更加深入地学习和理解我所感兴趣的主题。为了写出一篇有深度的文章，我需要做大量的研究和思考，这个过程极大地丰富了我的知识储备。</p>
         <p class="music-related-text">其次，写作帮助我理清思路和巩固记忆。将学到的知识用自己的话写出来，可以让我更好地理解和记住这些概念。这种输出的方式比单纯的阅读或听课更能加深印象。</p>
@@ -304,22 +205,35 @@
         </div>
       </div>
 
-      <!-- 图片轮播 - 隶属于关于section -->
-      <div class="gallery-section reveal" id="gallery">
-        <div class="gallery-container">
-          <div class="gallery-track" id="galleryTrack">
-            <div class="gallery-item" data-full="img/photos01.webp"><img src="img/photos01.webp" alt="图片1" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos02.webp"><img src="img/photos02.webp" alt="图片2" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos03.webp"><img src="img/photos03.webp" alt="图片3" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos04.webp"><img src="img/photos04.webp" alt="图片4" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos05.webp"><img src="img/photos05.webp" alt="图片5" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos06.webp"><img src="img/photos06.webp" alt="图片6" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos07.webp"><img src="img/photos07.webp" alt="图片7" loading="lazy" /></div>
-            <div class="gallery-item" data-full="img/photos08.webp"><img src="img/photos08.webp" alt="图片8" loading="lazy" /></div>
-          </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       图展（独立模块，随想碎片风格照片卡）
+       ============================================================ -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2 class="section-title">图展</h2>
+        <p class="section-subtitle">拾光成句，光影留痕 · 点击图片全屏查看</p>
+        <div class="gallery-nav">
+          <button class="gallery-nav-btn" id="galleryPrev" aria-label="查看上一张图片"><i class="ri-arrow-left-s-line"></i></button>
+          <button class="gallery-nav-btn" id="galleryNext" aria-label="查看下一张图片"><i class="ri-arrow-right-s-line"></i></button>
         </div>
       </div>
-
+      <div class="gallery-strip reveal">
+        <!-- 【替换】图片清单：仅保留 img；标题/时间/分组角标与大图均由 js/main.js initGalleryLightbox 的 galleryData 注入 -->
+        <div class="gallery-track" id="galleryTrack">
+          <figure class="gallery-item"><img src="img/photos01.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos02.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos03.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos04.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos05.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos06.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos07.webp" alt="" loading="lazy" /></figure>
+          <figure class="gallery-item"><img src="img/photos08.webp" alt="" loading="lazy" /></figure>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -328,46 +242,20 @@
        ============================================================ -->
   <footer>
     <div class="footer-inner">
-      <!-- 左侧：联系我 -->
+      <!-- 左侧：联系我（条目由 js/main.js profileData.socials 渲染） -->
       <div class="footer-col footer-contact">
         <h4 class="footer-title">联系我</h4>
-        <ul class="footer-contact-list">
-          <li>
-            <a href="mailto:2963286491@qq.com" aria-label="Email">
-              <i class="ri-mail-line"></i>
-              <span>2963286491@qq.com</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/stawei" target="_blank" aria-label="GitHub">
-              <i class="ri-github-fill"></i>
-              <span>GitHub</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://qm.qq.com/q/2963286491" target="_blank" aria-label="QQ">
-              <i class="ri-qq-line"></i>
-              <span>QQ</span>
-            </a>
-          </li>
-        </ul>
+        <ul class="footer-contact-list" id="footerContact"></ul>
       </div>
 
-      <!-- 右侧：导航 -->
+      <!-- 右侧：导航（原「导航栏」与「其他」两列合并） -->
       <div class="footer-col footer-nav">
         <h4 class="footer-title">导航栏</h4>
         <ul class="footer-links-list">
           <li><a href="https://zxwlove.qzz.io">首页</a></li>
-          <li><a href="https://blogzxwlove.us.ci/">个人Blog</a></li>
+          <li><a href="https://zxwlove.xyz/">个人Blog</a></li>
           <li><a href="https://zxwlove.us.ci/">个人home</a></li>
           <li><a href="https://stats.uptimerobot.com/GmwPqFWxrQ">监测站</a></li>
-        </ul>
-      </div>
-
-      <!-- 右侧：其他 -->
-      <div class="footer-col footer-other">
-        <h4 class="footer-title">其他</h4>
-        <ul class="footer-links-list">
           <li><a href="#" target="_blank">博客文章</a></li>
           <li><a href="#" target="_blank">资源分享</a></li>
           <li><a href="#" target="_blank">更新日志</a></li>
@@ -419,11 +307,104 @@
         </div>
       </div>
     </div>
-    <button class="lightbox-close" id="lightboxClose" aria-label="关闭">&times;</button>
+    <button class="lightbox-close" id="lightboxClose" aria-label="关闭"><i class="ri-close-line" aria-hidden="true"></i></button>
   </div>
+
+   <!-- ============================================================
+       悬浮音乐胶囊（fixed，收起态 mini 条 / 展开态完整胶囊）
+       ============================================================ -->
+  <div class="music-float" id="musicFloat" data-state="mini" data-playing="false">
+    <!-- 展开态：大圆角竖向卡片（信息头 → 歌单/歌词面板 → 进度条 → 控制行 → 音量行） -->
+    <div class="music-capsule" id="musicCapsule">
+      <div class="mc-head">
+        <div class="mc-cover-wrap">
+          <img class="mc-cover" id="musicCover" alt="封面">
+        </div>
+        <div class="mc-meta">
+          <div class="mc-song" id="musicSongName">--</div>
+          <div class="mc-artist" id="musicArtist">--</div>
+          <div class="mc-time"><span id="musicCurrentTime">0:00</span> / <span id="musicDuration">0:00</span></div>
+        </div>
+        <button class="mc-icon-btn mc-btn-square" id="mcListToggle" aria-label="展开/收起播放列表" aria-expanded="false" aria-controls="mcPanel">
+          <i class="ri-list-unordered" aria-hidden="true"></i>
+        </button>
+      </div>
+      <!-- 面板：歌单 / 歌词（内嵌块，展开态默认带出） -->
+      <div class="mc-panel" id="mcPanel">
+        <div class="mc-tabs" role="tablist">
+          <button class="mc-tab active" data-tab="list" role="tab" aria-selected="true">歌单</button>
+          <button class="mc-tab" data-tab="lyrics" role="tab" aria-selected="false">歌词</button>
+        </div>
+        <div class="mc-pane mc-pane-list active" data-pane="list">
+          <div class="music-playlist-items" id="musicPlaylistItems">
+            <!-- 播放列表项由 JS 动态生成 -->
+          </div>
+        </div>
+        <div class="mc-pane mc-pane-lyrics" data-pane="lyrics">
+          <div class="music-lyrics" id="musicLyrics">
+            <div class="music-lyrics-content" id="musicLyricsContent">加载中...</div>
+          </div>
+        </div>
+      </div>
+      <!-- 进度条：默认无圆点，hover 变厚浮出 -->
+      <div class="mc-progress-wrap">
+        <div class="music-progress-bar" id="musicProgressBar">
+          <div class="music-progress-fill" id="musicProgressFill"></div>
+        </div>
+      </div>
+      <!-- 控制行：平台 / 上一首 / 播放 / 下一首 / 循环模式 -->
+      <div class="mc-controls">
+        <button class="mc-icon-btn mc-btn-square music-platform-btn" id="musicPlatform" aria-label="切换音乐平台" title="切换音乐平台" data-platform="netease">
+          <i class="platform-icon platform-netease ri-netease-cloud-music-line" aria-hidden="true"></i>
+          <i class="platform-icon platform-tencent ri-qq-line" aria-hidden="true"></i>
+        </button>
+        <button class="music-btn" id="musicPrev" aria-label="上一首">
+          <i class="ri-skip-back-fill" aria-hidden="true"></i>
+        </button>
+        <button class="music-btn music-btn-play" id="musicPlay" aria-label="播放/暂停">
+          <i class="play-icon ri-play-fill" aria-hidden="true"></i>
+          <i class="pause-icon ri-pause-fill" style="display:none;" aria-hidden="true"></i>
+        </button>
+        <button class="music-btn" id="musicNext" aria-label="下一首">
+          <i class="ri-skip-forward-fill" aria-hidden="true"></i>
+        </button>
+        <button class="mc-icon-btn mc-btn-square music-mode-btn" id="musicMode" aria-label="切换播放模式" data-mode="list">
+          <i class="ri-repeat-2-fill mode-icon mode-list"></i>
+          <i class="ri-shuffle-fill mode-icon mode-random"></i>
+          <i class="ri-repeat-one-fill mode-icon mode-loop"></i>
+        </button>
+      </div>
+      <!-- 底部：喇叭 + 长音量条 -->
+      <div class="mc-footer">
+        <button class="mc-icon-btn mc-btn-ghost" id="musicMute" aria-label="静音/取消静音"><i class="ri-volume-up-fill"></i></button>
+        <div class="mc-volume-wrap">
+          <input class="mc-volume-range" type="range" id="musicVolume" min="0" max="100" value="70" aria-label="音量">
+        </div>
+      </div>
+    </div>
+    <!-- 收起态：圆形小封面（带播放角标）+ 歌名 + 当前歌词行（无词时回退「作曲：歌手」） -->
+    <button class="mc-mini" id="mcMini" aria-label="展开音乐播放器" aria-expanded="false" aria-controls="musicCapsule">
+      <!-- 内部进度流光（参考站 .aplayer-played：白色半透明覆盖层随进度生长） -->
+      <span class="mc-mini-progress" aria-hidden="true"><span class="mc-mini-progress-fill" id="mcMiniProgressFill"></span></span>
+      <span class="mc-mini-cover">
+        <img id="musicCoverMini" alt="">
+        <span class="mc-mini-badge" aria-hidden="true">
+          <i class="ri-play-fill mc-mini-i mc-mini-i-play"></i>
+          <i class="ri-pause-fill mc-mini-i mc-mini-i-pause"></i>
+        </span>
+      </span>
+      <span class="mc-mini-name" id="mcMiniName">音乐</span>
+      <span class="mc-mini-artist" id="mcMiniArtist">--</span>
+      <span class="mc-mini-tips" aria-hidden="true">播放音乐</span>
+    </button>
+  </div>
+<!-- 深色模式全站极光背景层 + 星空（本地粒子脚本，非外链） -->
+  <div class="aurora" aria-hidden="true"></div>
+  <canvas id="universe" aria-hidden="true"></canvas>
 
   <!-- 主脚本（data + main 合并） -->
   <script src="js/main.js"></script>
+  <script src="js/starfield.js"></script>
   <!-- 音乐模块（延迟加载） -->
   <script defer src="js/music.js"></script>
   <!-- 今日诗词 SDK（延迟加载，不阻塞） -->

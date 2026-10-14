@@ -1,29 +1,40 @@
 /* 数据配置 */
 const profileData = {
   name: '浅小兮',
-  avatar: '/img/avatar.jpg',
   roles: ['一名开发者', '一名设计师', '一名终身学习者', '一名热爱生活的人'],
-  socials: {
-    github: 'https://github.com/stawei',
-    bilibili: 'https://space.bilibili.com/516107164',
-    email: 'mailto:2963286491@qq.com'
-  }
+  // 社交链接单一数据源：Hero 胶囊与页脚「联系我」均由此渲染。
+  // 头像等本地图片仍留在 index.html —— Vite 构建会哈希 img/ 路径，JS 硬编码会生产 404
+  socials: [
+    { key: 'github', icon: 'ri-github-fill', label: 'GitHub', href: 'https://github.com/stawei' },
+    { key: 'bilibili', icon: 'ri-bilibili-fill', label: 'B站', href: 'https://space.bilibili.com/516107164' },
+    { key: 'email', icon: 'ri-mail-send-line', label: '邮箱', href: 'mailto:2963286491@qq.com', footerIcon: 'ri-mail-line', footerLabel: '2963286491@qq.com' },
+    { key: 'douyin', icon: 'ri-tiktok-line', label: '抖音', href: 'https://www.douyin.com/search/963209970' },
+    { key: 'qq', icon: 'ri-qq-line', label: 'QQ', href: 'https://qm.qq.com/q/2963286491' }
+  ]
 };
 
 const introData = {
   paragraphs: [
-    '你好，我是<strong>浅小兮</strong>，一名热爱构建数字产品的开发者。我喜欢把想法变成可以触摸、可以使用的真实产品，从一行行代码到最终交付的体验，每一步都让我感到兴奋。',
-    '我主要关注 <strong>前端工程</strong> 与 <strong>用户体验设计</strong>，相信好的产品既要有扎实的工程基础，也要有让人愉悦的视觉表达。工作之余，我喜欢折腾开源项目、写技术博客，也偶尔做点小工具解决生活中的小问题。',
-    '最近我在学习更多关于 <strong>全栈架构</strong> 和 <strong>AI 应用</strong> 的知识，希望未来能构建出更有影响力的产品。如果你对同样的领域感兴趣，欢迎随时和我交流。',
-    '除了写代码，我也喜欢 <strong>音乐</strong>、<strong>摄影</strong> 和 <strong>阅读</strong>，这些爱好让我的生活保持平衡，也常常成为灵感的来源。'
+    '你好呀，很高兴认识你👋我是<strong>浅小兮</strong>，你也可以称呼<strong>千曦一梦</strong>或者<strong>不羡明月知</strong>。一名热爱构建数字产品的开发者——看着一行行代码慢慢长出模样，变成别人能点开、能用上的东西，那种满足感，什么都替代不了。',
+    '我主要关注 <strong>前后端工程</strong> 与 <strong>大数据运维</strong>，总觉得一个舒服的技术实现，得既有靠谱的底子，又有让人眼前一亮的样子。',
+    '不忙的时候，喜欢泡在开源项目里写写改改，在博客里记下踩过的坑和冒出的光，也随手做些小工具，解决生活里那些不起眼的小麻烦。',
+    '最近在学习更多关于 <strong>全栈架构</strong> 和 <strong>AI 应用</strong> 的知识。如果你对同样的领域感兴趣，欢迎随时和我交流。',
+    '喜欢 <strong>音乐</strong>、<strong>阅读</strong> 和 <strong>刷抖音</strong>，当然偶尔也会<strong>运动</strong>一下下的，这些细碎的爱好让生活不至于太紧绷，也常常给我送来意想不到的灵感。'
   ],
-  skills: ['JavaScript', 'TypeScript', 'Vue', 'React', 'Node.js', 'Python', 'Docker', 'Git'],
-  tags: ['浅小兮', '千曦一梦', '多喜乐，常安宁', 'zxwlove', '相遇的刹那开始就注定了别离'],
-  stats: [
-    { num: '4', label: '个项目' },
-    { num: '4', label: '年学习' },
-    { num: '∞', label: '热情' }
-  ]
+  // level 为掌握度，悬停技能标签时由 initSkillMeter() 填充到计量条
+  skills: [
+    { name: 'Java', level: '70%' },
+    { name: 'TypeScript', level: '95%' },
+    { name: 'JavaScript', level: '90%' },
+    { name: 'React', level: '80%' },
+    { name: 'Node.js', level: '75%' },
+    { name: 'Python', level: '70%' },
+    { name: 'Docker', level: '65%' },
+    { name: 'Git', level: '90%' },
+    { name: 'Msql', level: '70%' },
+    { name: 'Hive', level: '65%' }
+  ],
+  tags: ['浅小兮', '千曦一梦', '多喜乐，常安宁', 'zxwlove', '@location', '相遇的刹那开始就注定了别离']
 };
 
 const projectsData = [
@@ -53,11 +64,11 @@ const projectsData = [
   },
   {
     cover: 'https://free.picui.cn/free/2026/08/22/6a89311a517fd.png',
-    name: '暂定',
-    desc: '暂定',
-    tech: ['暂定', '暂定', '暂定'],
-    github: 'https://github.com/你的用户名/project-4',
-    demo: 'https://your-demo4.vercel.app'
+    name: 'Starlight',
+    desc: '个人设计的Blog',
+    tech: ['Vite', 'Vue3', 'Starlight'],
+    github: 'https://github.com/stawei/Starlight',
+    demo: 'https://zxwlove.xyz'
   }
 ];
 
@@ -323,6 +334,163 @@ const musicConfig = {
   }
 
   /* ============================================================
+     10a. 自我介绍渲染（使用 introData）——段落 / 技能标签 / 标签卡
+     ============================================================ */
+  function renderIntro() {
+    var data = (typeof introData !== 'undefined') ? introData : null;
+    if (!data) return;
+
+    // 段落：插到 .intro-text 最前，技能云与计量条保持静态结构
+    var textEl = document.querySelector('#intro .intro-text');
+    if (textEl && Array.isArray(data.paragraphs)) {
+      var frag = document.createDocumentFragment();
+      data.paragraphs.forEach(function (html) {
+        var p = document.createElement('p');
+        // 文案为本地数据常量，含受控 <strong> 标记，与项目/时间线渲染方式一致
+        p.innerHTML = html;
+        frag.appendChild(p);
+      });
+      textEl.insertBefore(frag, textEl.firstChild);
+    }
+
+    // 技能标签：data-level 驱动悬停计量条
+    var cloud = document.querySelector('#intro .skill-cloud');
+    if (cloud && Array.isArray(data.skills)) {
+      cloud.textContent = '';
+      data.skills.forEach(function (s) {
+        var pill = document.createElement('span');
+        pill.className = 'skill-pill';
+        pill.textContent = s.name;
+        if (s.level) pill.setAttribute('data-level', s.level);
+        cloud.appendChild(pill);
+      });
+    }
+
+    // 标签卡：'@location' 占位处放回访客城市标签（由 fetchLocation 填充）
+    var tagsCard = document.getElementById('introTags');
+    if (tagsCard && Array.isArray(data.tags)) {
+      var locAnchor = document.getElementById('locationTag');
+      tagsCard.textContent = '';
+      data.tags.forEach(function (t) {
+        if (t === '@location') {
+          if (locAnchor) tagsCard.appendChild(locAnchor);
+          return;
+        }
+        var span = document.createElement('span');
+        span.className = 'intro-tag';
+        span.textContent = t;
+        tagsCard.appendChild(span);
+      });
+      if (locAnchor && !locAnchor.parentNode) tagsCard.appendChild(locAnchor);
+    }
+
+    console.info('[intro] 由 introData 渲染完成：段落',
+      (data.paragraphs || []).length, '技能', (data.skills || []).length, '标签', (data.tags || []).length);
+  }
+
+  /* ============================================================
+     10c. 社交链接渲染（使用 profileData.socials）——Hero 胶囊 + 页脚「联系我」
+     ============================================================ */
+  function makeSocialLink(s, opts) {
+    opts = opts || {};
+    var a = document.createElement('a');
+    a.href = s.href;
+    if (!/^mailto:/i.test(s.href)) {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+    a.setAttribute('aria-label', s.label);
+    if (opts.className) a.className = opts.className;
+    var i = document.createElement('i');
+    i.className = typeof opts.icon === 'function' ? opts.icon(s) : s.icon;
+    var span = document.createElement('span');
+    span.textContent = typeof opts.label === 'function' ? opts.label(s) : s.label;
+    a.appendChild(i);
+    a.appendChild(span);
+    return a;
+  }
+
+  function renderSocials() {
+    var wrap = document.getElementById('heroSocials');
+    if (!wrap || !Array.isArray(profileData.socials)) return;
+    wrap.textContent = '';
+    profileData.socials.forEach(function (s) {
+      wrap.appendChild(makeSocialLink(s, { className: 'social-btn social-pill' }));
+    });
+  }
+
+  function renderFooterContact() {
+    var list = document.getElementById('footerContact');
+    if (!list || !Array.isArray(profileData.socials)) return;
+    list.textContent = '';
+    ['email', 'github', 'qq'].forEach(function (key) {
+      var s = profileData.socials.filter(function (x) { return x.key === key; })[0];
+      if (!s) return;
+      var li = document.createElement('li');
+      li.appendChild(makeSocialLink(s, {
+        icon: function (x) { return x.footerIcon || x.icon; },
+        label: function (x) { return x.footerLabel || x.label; }
+      }));
+      list.appendChild(li);
+    });
+    console.info('[socials] Hero 与页脚联系方式已由 profileData.socials 渲染');
+  }
+
+  /* ============================================================
+     10b. 技能掌握度计量条（悬停/聚焦技能标签 → 填充到 data-level）
+     ============================================================ */
+  function initSkillMeter() {
+    var cloud = document.querySelector('.skill-cloud');
+    var meter = document.getElementById('skillMeter');
+    if (!cloud || !meter) return;
+    var fill = meter.querySelector('.skill-meter-fill');
+    var nameEl = meter.querySelector('.skill-meter-name');
+    var valEl = meter.querySelector('.skill-meter-val');
+    var pills = cloud.querySelectorAll('.skill-pill[data-level]');
+
+    var DEFAULT_NAME = '悬停技能查看掌握度';
+
+    function show(pill) {
+      // data-level 形如 "95%"，仅取数字并夹到 0-100，避免异常值撑破轨道
+      var n = parseFloat(pill.getAttribute('data-level'));
+      if (isNaN(n)) return;
+      n = Math.max(0, Math.min(100, n));
+      fill.style.width = n + '%';
+      nameEl.textContent = pill.textContent.trim();
+      valEl.textContent = n + '%';
+      meter.classList.add('is-active');
+      meter.setAttribute('aria-valuenow', String(n));
+      meter.setAttribute('aria-valuetext', nameEl.textContent + ' ' + n + '%');
+    }
+
+    function reset() {
+      fill.style.width = '0%';
+      nameEl.textContent = DEFAULT_NAME;
+      valEl.textContent = '--';
+      meter.classList.remove('is-active');
+      meter.setAttribute('aria-valuenow', '0');
+      meter.removeAttribute('aria-valuetext');
+    }
+
+    pills.forEach(function (pill) {
+      pill.setAttribute('tabindex', '0');
+      pill.addEventListener('pointerenter', function () { show(pill); });
+      pill.addEventListener('pointerleave', reset);
+      // 键盘可达：聚焦即展示
+      pill.addEventListener('focus', function () { show(pill); });
+      pill.addEventListener('blur', reset);
+      // 触屏无 hover：点按切换展示
+      pill.addEventListener('click', function (e) {
+        if (window.matchMedia('(hover: hover)').matches) return;
+        e.preventDefault();
+        show(pill);
+      });
+    });
+
+    reset();
+  }
+
+  /* ============================================================
      11. 获取城市信息（ipwho.is API + 中英文映射兜底）
      ============================================================ */
   // 常见城市中英文映射表
@@ -348,7 +516,8 @@ const musicConfig = {
 
   function fetchLocation() {
     var tag = document.getElementById('locationTag');
-    if (!tag) return;
+    var heroCity = document.getElementById('heroCity');
+    if (!tag && !heroCity) return;
     // 延迟执行，避免阻塞首屏渲染
     setTimeout(function() {
       fetch('https://ipwho.is/')
@@ -356,15 +525,72 @@ const musicConfig = {
         .then(function (data) {
           if (data.success && data.city) {
             var cityName = toChineseCity(data.city);
-            tag.textContent = '欢迎来自：' + cityName + '的友人';
+            if (tag) tag.textContent = '欢迎来自：' + cityName + '的友人';
+            if (heroCity) {
+              heroCity.textContent = cityName;
+              fetchWeather(cityName.replace(/市$/, ''));
+            }
           } else {
-            tag.textContent = '欢迎远方的友人';
+            if (tag) tag.textContent = '欢迎远方的友人';
+            if (heroCity) heroCity.textContent = '远方';
+            fetchWeather(); // 不带 city，由天气接口按 IP 自动定位
           }
         })
         .catch(function () {
-          tag.textContent = '欢迎远方的友人';
+          if (tag) tag.textContent = '欢迎远方的友人';
+          if (heroCity) heroCity.textContent = '远方';
+          fetchWeather();
         });
     }, 1000);
+  }
+
+  /* 头像下状态条：地区后的天气段（uapis.cn 天气接口），失败则保持隐藏 */
+  function fetchWeather(city) {
+    var el = document.getElementById('heroWeather');
+    var sep = document.querySelector('.hero-weather-sep');
+    if (!el) return;
+    var url = 'https://uapis.cn/api/v1/misc/weather';
+    if (city) url += '?city=' + encodeURIComponent(city);
+    fetch(url)
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data || !data.weather || typeof data.temperature !== 'number') return;
+        // 逐节点构建，API 文本走 textContent，避免 HTML 注入
+        el.textContent = '';
+        var icon = document.createElement('i');
+        icon.className = weatherIcon(data.weather);
+        el.appendChild(icon);
+        el.appendChild(document.createTextNode(' ' + data.weather + ' · ' + data.temperature + '℃'));
+        el.hidden = false;
+        if (sep) sep.hidden = false;
+      })
+      .catch(function () { /* 接口不可用时静默隐藏，不影响时间/地点 */ });
+  }
+
+  /* 按天气现象文字匹配 Remix Icon，未命中用多云兜底 */
+  function weatherIcon(w) {
+    if (/晴/.test(w)) return 'ri-sun-line';
+    if (/云|阴/.test(w)) return 'ri-cloud-line';
+    if (/雷/.test(w)) return 'ri-flashlight-line';
+    if (/雨/.test(w)) return 'ri-rainy-line';
+    if (/雪/.test(w)) return 'ri-snowflake-line';
+    if (/雾|霾/.test(w)) return 'ri-mist-line';
+    if (/风/.test(w)) return 'ri-windy-line';
+    return 'ri-cloud-line';
+  }
+
+  /* Hero 头像下状态条：实时时间（HH:MM），每分钟刷新 */
+  function initHeroClock() {
+    var el = document.getElementById('heroTime');
+    if (!el) return;
+    function tick() {
+      var d = new Date();
+      var hh = ('0' + d.getHours()).slice(-2);
+      var mm = ('0' + d.getMinutes()).slice(-2);
+      el.textContent = hh + ':' + mm;
+    }
+    tick();
+    setInterval(tick, 60000);
   }
 
   /* ============================================================
@@ -377,62 +603,36 @@ const musicConfig = {
     // 添加光标样式
     poemEl.classList.add('poem-typewriter');
 
-    var poems = [];
-    var poemIdx = 0, charIdx = 0, deleting = false;
-
     // 等待今日诗词 SDK 加载完成
     var checkInterval = setInterval(function () {
       var text = poemEl.textContent || '';
       if (text && text !== '正在加载今日诗词....' && text.length > 0) {
         clearInterval(checkInterval);
-        // 保存第一首诗词
-        poems.push(text);
         // 清空内容，开始打字动画
         poemEl.textContent = '';
-        typeLoop();
+        typeOnce(text);
       }
     }, 300);
 
     // 超时保护
     setTimeout(function () { clearInterval(checkInterval); }, 5000);
 
-    function typeLoop() {
-      var current = poems[poemIdx] || '';
-      if (deleting) {
-        poemEl.textContent = current.substring(0, charIdx--);
-        if (charIdx < 0) {
-          deleting = false;
-          poemIdx = (poemIdx + 1) % poems.length;
-          setTimeout(typeLoop, 400);
+    // 只打一遍：打完立刻收尾，不再回删轮播
+    function typeOnce(poem) {
+      var i = 0;
+      function step() {
+        if (i > poem.length) {
+          poemEl.textContent = poem;
+          // 移除光标，静置成一行普通诗词
+          poemEl.classList.remove('poem-typewriter');
+          console.info('[poem] 打字完成，已停止循环:', poem);
           return;
         }
-        setTimeout(typeLoop, 50);
-      } else {
-        poemEl.textContent = current.substring(0, charIdx++);
-        if (charIdx > current.length) {
-          deleting = true;
-          setTimeout(typeLoop, 2000);
-          return;
-        }
-        setTimeout(typeLoop, 100);
+        poemEl.textContent = poem.substring(0, i++);
+        setTimeout(step, 100);
       }
+      step();
     }
-
-    // 监听 SDK 后续更新（如果 SDK 会刷新诗词）
-    var observer = new MutationObserver(function () {
-      var newText = poemEl.textContent || '';
-      if (newText && newText !== '正在加载今日诗词....') {
-        // 检查是否是新诗词
-        var isNew = true;
-        for (var i = 0; i < poems.length; i++) {
-          if (poems[i] === newText) { isNew = false; break; }
-        }
-        if (isNew) {
-          poems.push(newText);
-        }
-      }
-    });
-    observer.observe(poemEl, { childList: true, characterData: true, subtree: true });
   }
 
   /* ============================================================
@@ -473,9 +673,15 @@ const musicConfig = {
     initTypewriter();
     renderProjects();
     renderTimeline();
+    renderIntro();
+    renderSocials();
+    renderFooterContact();
+    initSkillMeter();
     fetchLocation();
+    initHeroClock();
     initPoemTypewriter();
     initGalleryLightbox();
+    initGalleryNav();
 
     // 滚动监听
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -523,31 +729,52 @@ const musicConfig = {
     if (!lightbox || !lightboxImg) return;
 
     var currentIndex = 0;
-    var totalImages = 8; // 实际图片数量（不计算复制的）
 
     // 图片介绍数据
     var galleryData = [
-      { title: '绿意镜影', desc: '我站在玻璃窗前，用手机记录下这美好的瞬间。透过玻璃，窗外的绿树倒影与我的身影重叠，形成了一种独特的双重曝光效果。阳光透过树叶洒下斑驳的光影，红白相间的校服在绿意中格外醒目。这是一个在户外休闲场所拍摄的日常片段，玻璃上的树影与人物相映成趣，展现了都市中难得的自然气息。', date: '2021年春', tag: '生活记录' },
-      { title: '校园春景', desc: '晴朗的春日，红砖教学楼静静矗立在绿树环绕之中，前方池塘倒映着蓝天与绿意。这是在校园中捕捉到的宁静而美好的日常景象，展现了学习环境的和谐与自然之美。', date: '2024年春', tag: '校园风光' },
-      { title: '黄昏校园', desc: '傍晚时分，红砖教学楼在橙黄色的天幕下静静矗立，建筑间的绿化区域与树木构成了一幅宁静的校园景象。这是在校园中捕捉到的黄昏美景，展现了学习环境的平和与自然之美。', date: '2024年春', tag: '校园风光' },
-      { title: '知识殿堂', desc: '现代图书馆的圆形玻璃结构上，"探索思想的疆域，发现知识的奇迹"的文字与书架的倒影交织，形成独特的视觉效果。这是一个充满艺术感的阅读空间，展现了知识与文化的魅力。', date: '2024年春', tag: '文化空间' },
-      { title: '乐园风光', desc: '透过茂密的绿树，远处的摩天轮在灰蓝色的天幕下静静矗立，绿色的座舱点缀其间。右侧可见其他游乐设施，整个场景充满了休闲与欢乐的氛围。这是在游乐园中捕捉到的轻松时刻，展现了娱乐空间的活力与魅力。', date: '2025年春', tag: '游乐园' },
-      { title: '高达雕像', desc: '巨大的高达机器人雕像矗立在商业区，白色、蓝色和红色的配色方案十分醒目。背景中可见UNIQLO商店和其他现代建筑，这个动漫角色成为城市景观中引人注目的地标。这是在商业区拍摄的文化地标照片，展现了动漫文化与城市环境的融合。', date: '2025年春', tag: '动漫文化' },
-      { title: '慈悲观音', desc: '巨大的观音雕像庄严矗立，灰色石材雕刻出细腻的衣纹和装饰，右手结印，左手持物，坐于莲花座上。背景是古建筑檐角，灰蒙的天空增添肃穆感。这是在宗教场所拍摄的佛教艺术作品，展现了信仰与艺术的融合。', date: '2026年春', tag: '宗教文化' },
-      { title: '蓝天绿树', desc: '晴朗的蓝天下，一棵茂盛的绿树伸展枝叶，背景中可见城市建筑。这是在城市中捕捉到的自然与都市交融的景象，展现了城市中的绿色生机。', date: '2026年春', tag: '自然风光' }
+      { title: '绿意镜影', desc: '我站在玻璃窗前，用手机记录下这美好的瞬间。透过玻璃，窗外的绿树倒影与我的身影重叠，形成了一种独特的双重曝光效果。阳光透过树叶洒下斑驳的光影，红白相间的校服在绿意中格外醒目。这是一个在户外休闲场所拍摄的日常片段，玻璃上的树影与人物相映成趣，展现了都市中难得的自然气息。', date: '2021·春', tag: '生活记录' },
+      { title: '校园春景', desc: '晴朗的春日，红砖教学楼静静矗立在绿树环绕之中，前方池塘倒映着蓝天与绿意。这是在校园中捕捉到的宁静而美好的日常景象，展现了学习环境的和谐与自然之美。', date: '2024·春', tag: '校园风光' },
+      { title: '黄昏校园', desc: '傍晚时分，红砖教学楼在橙黄色的天幕下静静矗立，建筑间的绿化区域与树木构成了一幅宁静的校园景象。这是在校园中捕捉到的黄昏美景，展现了学习环境的平和与自然之美。', date: '2024·春', tag: '校园风光' },
+      { title: '知识殿堂', desc: '现代图书馆的圆形玻璃结构上，"探索思想的疆域，发现知识的奇迹"的文字与书架的倒影交织，形成独特的视觉效果。这是一个充满艺术感的阅读空间，展现了知识与文化的魅力。', date: '2024·春', tag: '文化空间' },
+      { title: '乐园风光', desc: '透过茂密的绿树，远处的摩天轮在灰蓝色的天幕下静静矗立，绿色的座舱点缀其间。右侧可见其他游乐设施，整个场景充满了休闲与欢乐的氛围。这是在游乐园中捕捉到的轻松时刻，展现了娱乐空间的活力与魅力。', date: '2025·春', tag: '游乐园' },
+      { title: '高达雕像', desc: '巨大的高达机器人雕像矗立在商业区，白色、蓝色和红色的配色方案十分醒目。背景中可见UNIQLO商店和其他现代建筑，这个动漫角色成为城市景观中引人注目的地标。这是在商业区拍摄的文化地标照片，展现了动漫文化与城市环境的融合。', date: '2025·春', tag: '动漫文化' },
+      { title: '慈悲观音', desc: '巨大的观音雕像庄严矗立，灰色石材雕刻出细腻的衣纹和装饰，右手结印，左手持物，坐于莲花座上。背景是古建筑檐角，灰蒙的天空增添肃穆感。这是在宗教场所拍摄的佛教艺术作品，展现了信仰与艺术的融合。', date: '2026·春', tag: '宗教文化' },
+      { title: '蓝天绿树', desc: '晴朗的蓝天下，一棵茂盛的绿树伸展枝叶，背景中可见城市建筑。这是在城市中捕捉到的自然与都市交融的景象，展现了城市中的绿色生机。', date: '2026·春', tag: '自然风光' }
     ];
 
-    // 优先使用每个 .gallery-item 的 data-full，并把反斜杠规范化成 URL 可用的 /
+    var totalImages = galleryData.length;
+
+    // 大图直接取卡片 img 已解析的 src：构建后是哈希 URL；
+    // 原先 data-full 硬编码 img/xxx.webp 在 dist（无 img 目录）会 404，一并去掉该重复属性
     var galleryFullSrcs = Array.prototype.slice.call(galleryItems).slice(0, totalImages).map(function (item) {
-      var src = item && (item.getAttribute('data-full') || (item.dataset && item.dataset.full));
-      if (!src) return 'https://picsum.photos/seed/gallery' + (galleryItems.length + 1) + '/1200/800';
-      return src.replace(/\\/g, '/');
+      var img = item && item.querySelector('img');
+      return img ? img.src : '';
+    });
+
+    // 卡片角标（时间/名称/分组）由 galleryData 注入，index.html 不再重复硬编码
+    Array.prototype.slice.call(galleryItems).slice(0, totalImages).forEach(function (item, i) {
+      var g = galleryData[i];
+      if (!g || item.querySelector('.gi-name')) return;
+      var img = item.querySelector('img');
+      if (img && !img.getAttribute('alt')) img.setAttribute('alt', g.title);
+      var time = document.createElement('span');
+      time.className = 'gi-time';
+      time.textContent = g.date;
+      var name = document.createElement('span');
+      name.className = 'gi-name';
+      name.textContent = g.title;
+      var tag = document.createElement('span');
+      tag.className = 'gi-tag';
+      tag.textContent = g.tag;
+      item.appendChild(time);
+      item.appendChild(name);
+      item.appendChild(tag);
     });
 
     // 更新全屏查看器内容
     function updateLightbox(index) {
       var data = galleryData[index];
-      var fullSrc = galleryFullSrcs[index] || ('https://picsum.photos/seed/gallery' + (index + 1) + '/1200/800');
+      var fullSrc = galleryFullSrcs[index];
 
       lightboxImg.src = fullSrc;
       lightboxTitle.textContent = data.title;
@@ -662,6 +889,45 @@ const musicConfig = {
         showNext();
       }
     });
+  }
+
+  /* ============================================================
+     12. 图展左右切换按钮（滚动 .gallery-strip 一张卡一步）
+     ============================================================ */
+  function initGalleryNav() {
+    var strip = document.querySelector('#gallery .gallery-strip');
+    var prev = document.getElementById('galleryPrev');
+    var next = document.getElementById('galleryNext');
+    if (!strip || !prev || !next) return;
+    var track = strip.querySelector('.gallery-track');
+
+    // 一步 = 一张卡宽 + gap
+    function step() {
+      var item = track && track.querySelector('.gallery-item');
+      if (!item) return strip.clientWidth * 0.8;
+      var st = window.getComputedStyle(track);
+      var gap = parseFloat(st.columnGap || st.gap) || 16;
+      return item.getBoundingClientRect().width + gap;
+    }
+
+    function update() {
+      var max = strip.scrollWidth - strip.clientWidth;
+      prev.disabled = strip.scrollLeft <= 1;
+      next.disabled = strip.scrollLeft >= max - 1;
+    }
+
+    prev.addEventListener('click', function () {
+      strip.scrollBy({ left: -step(), behavior: 'smooth' });
+    });
+    next.addEventListener('click', function () {
+      strip.scrollBy({ left: step(), behavior: 'smooth' });
+    });
+    strip.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    // 图片懒加载完成后宽度稳定，再校准按钮禁用态
+    if (window.ResizeObserver && track) new ResizeObserver(update).observe(track);
+    window.addEventListener('load', update);
+    update();
   }
 
   // DOM 就绪后执行

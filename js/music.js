@@ -14,16 +14,19 @@ let isRecovering = false; // 防止错误恢复重复触发
 let skipFailCount = 0; // 连续播放失败计数
 const MAX_SKIP_FAILS = 5; // 最大连续失败次数，超过后停止自动跳歌
 
-/** 显示音乐错误提示 */
+/** 显示音乐错误提示（展开态写歌名，收起态写 mini 条，保证两种形态都可见） */
 function showMusicError(message) {
-  const songName = document.getElementById('musicSongName');
-  if (!songName) return;
-  const originalText = songName.textContent;
-  songName.textContent = message;
-  songName.style.color = '#ff6b6b';
+  const float = document.getElementById('musicFloat');
+  const target = float && float.getAttribute('data-state') === 'mini'
+    ? document.getElementById('mcMiniName')
+    : document.getElementById('musicSongName');
+  if (!target) return;
+  const originalText = target.textContent;
+  target.textContent = message;
+  target.style.color = '#ff6b6b';
   setTimeout(() => {
-    songName.textContent = originalText;
-    songName.style.color = '';
+    target.textContent = originalText;
+    target.style.color = '';
   }, 3000);
 }
 
@@ -86,7 +89,8 @@ async function fetchPlaylist(server, type, id) {
               name: item.title || item.name || '未知歌曲',
               artist: item.author || item.artist || '未知歌手',
               url: item.url,
-              cover: item.pic,
+              // 不同 Meting 源封面字段不一致：xiaoguan/qijieya 用 pic，moeyao 用 cover
+              cover: item.pic || item.cover || '',
               lrc: item.lrc || '',
               server: server,
               rawId: rawId
@@ -235,7 +239,7 @@ async function fetchAllPlaylists() {
   return allSongs;
 }
 
-/** 更新播放按钮状态 */
+/** 更新播放按钮状态（同时同步悬浮层 data-playing，驱动 mini 封面角标） */
 function updatePlayButton() {
   const btn = document.getElementById('musicPlay');
   if (!btn || !ap) return;
@@ -245,6 +249,11 @@ function updatePlayButton() {
     playIcon.style.display = ap.paused ? 'block' : 'none';
     pauseIcon.style.display = ap.paused ? 'none' : 'block';
   }
+  const float = document.getElementById('musicFloat');
+  if (float) float.setAttribute('data-playing', ap.paused ? 'false' : 'true');
+  // 同步 Hero 头像呼吸灯节奏：播放时 data-music="playing" 光晕更快更亮
+  const heroWrap = document.querySelector('.hero-avatar-wrap');
+  if (heroWrap) heroWrap.setAttribute('data-music', ap.paused ? 'idle' : 'playing');
 }
 
 /** 获取歌词内容（支持 URL 或文本） */
@@ -259,6 +268,14 @@ async function fetchLyrics(lrcUrl) {
   }
 }
 
+/** 封面兜底占位：图床失效或源未返回封面时回退首页头像。
+ *  取 .hero-avatar 已解析的 src——Vite 构建后 img/ 相对路径会被哈希进 assets/，
+ *  JS 里硬编码 'img/avatar.jpg' 在生产会 404，相对路径仅作极端兜底 */
+function coverFallbackSrc() {
+  const hero = document.querySelector('.hero-avatar');
+  return hero && hero.src ? hero.src : 'img/avatar.jpg';
+}
+
 /** 更新歌曲信息 */
 async function updateSongInfo() {
   if (!ap) return;
@@ -266,14 +283,50 @@ async function updateSongInfo() {
   const cover = document.getElementById('musicCover');
   const name = document.getElementById('musicSongName');
   const artist = document.getElementById('musicArtist');
-  if (cover && song.cover) cover.src = song.cover;
+  console.log('[Music] updateSongInfo →', song.name, '| cover:', song.cover || '(空，用头像兜底)');
+  if (cover) cover.src = song.cover || coverFallbackSrc();
   if (name) name.textContent = song.name || '--';
   if (artist) artist.textContent = song.artist || '--';
+
+  // 收起态 mini 条同步（同一首歌的第二份显示）
+  const coverMini = document.getElementById('musicCoverMini');
+  const nameMini = document.getElementById('mcMiniName');
+  const artistMini = document.getElementById('mcMiniArtist');
+  if (coverMini) coverMini.src = song.cover || coverFallbackSrc();
+  if (nameMini) nameMini.textContent = song.name || '音乐';
+  // mini 条右侧栏用于显示当前歌词行，此处先给歌手名兜底，待歌词就绪后由 updateMiniLyric 覆盖
+  if (artistMini) artistMini.textContent = song.artist ? '作曲：' + song.artist : '--';
 
   const lyricsText = await fetchLyrics(song.lrc || '');
   currentLyrics = parseLRC(lyricsText);
   renderLyrics();
+  updateMiniLyric();
   updatePlaylistHighlight();
+}
+
+/**
+ * mini 条右侧栏 = 当前歌词行（与面板歌词同步跟词）。
+ * 未到第一句、无歌词或静音段时回退为「作曲：歌手」，避免出现空白栏。
+ */
+function updateMiniLyric() {
+  const el = document.getElementById('mcMiniArtist');
+  if (!el || !ap) return;
+  let text = '';
+  if (currentLyrics.length) {
+    const t = ap.audio.currentTime;
+    for (let i = 0; i < currentLyrics.length; i++) {
+      if (currentLyrics[i].time <= t) text = currentLyrics[i].text;
+      else break;
+    }
+  }
+  if (!text) {
+    const song = ap.list.audios[ap.list.index] || {};
+    text = song.artist ? '作曲：' + song.artist : '--';
+  }
+  if (el.textContent !== text) {
+    el.textContent = text;
+    console.debug('[Music] mini lyric →', text);
+  }
 }
 
 /** 更新进度条 */
@@ -284,6 +337,9 @@ function updateProgress() {
   const duration = document.getElementById('musicDuration');
   const percent = ap.duration ? (ap.audio.currentTime / ap.duration) * 100 : 0;
   if (fill) fill.style.width = percent + '%';
+  // mini 胶囊内部进度流光（参考站 #nav-music 的 played 覆盖层）
+  const miniFill = document.getElementById('mcMiniProgressFill');
+  if (miniFill) miniFill.style.width = percent + '%';
   if (current) current.textContent = formatTime(ap.audio.currentTime);
   if (duration) duration.textContent = formatTime(ap.duration);
 }
@@ -295,7 +351,7 @@ function renderLyrics() {
   if (!currentLyrics.length) {
     container.innerHTML = `
       <div class="music-lyrics-empty">
-        <div class="music-lyrics-empty-icon">🎵</div>
+        <div class="music-lyrics-empty-icon"><i class="ri-music-2-line" aria-hidden="true"></i></div>
         <div class="music-lyrics-empty-text">暂无歌词</div>
         <div class="music-lyrics-empty-hint">享受音乐的美好</div>
       </div>
@@ -349,7 +405,6 @@ function switchPlatform() {
   if (!ap) return;
   currentPlatform = currentPlatform === 'netease' ? 'tencent' : 'netease';
   updatePlatformButton();
-  updatePlaylistHeader();
   renderPlaylistWithFilter();
 }
 
@@ -357,15 +412,6 @@ function switchPlatform() {
 function updatePlatformButton() {
   const btn = document.getElementById('musicPlatform');
   if (btn) btn.setAttribute('data-platform', currentPlatform);
-}
-
-/** 更新播放列表标题显示当前平台 */
-function updatePlaylistHeader() {
-  const header = document.querySelector('.music-playlist-header');
-  if (!header) return;
-  const names = { netease: '网易云', tencent: 'QQ音乐' };
-  const icons = { netease: '🎵', tencent: '🎶' };
-  header.textContent = `播放列表 · ${icons[currentPlatform] || ''} ${names[currentPlatform] || ''}`;
 }
 
 /** 根据平台过滤并渲染播放列表 */
@@ -378,82 +424,28 @@ function renderPlaylistWithFilter() {
   if (songs.length === 0) {
     container.innerHTML = `
       <div class="music-playlist-empty">
-        <div class="music-playlist-empty-icon">🎵</div>
+        <div class="music-playlist-empty-icon"><i class="ri-music-2-line" aria-hidden="true"></i></div>
         <div class="music-playlist-empty-text">该平台暂无歌曲</div>
       </div>`;
     return;
   }
 
-  container.innerHTML = songs.map(song => {
+  container.innerHTML = songs.map((song, i) => {
     const originalIndex = ap.list.audios.indexOf(song);
-    return songItemHTML(song, originalIndex);
+    return songItemHTML(song, originalIndex, i + 1);
   }).join('');
 
   bindPlaylistClicks(container);
   updatePlaylistHighlight();
 }
 
-/** 渲染独立歌单 */
-function renderSeparatePlaylists() {
-  const container = document.getElementById('musicPlaylistItems');
-  if (!container || !ap) return;
-
-  const songs = ap.list.audios || [];
-  const neteaseSongs = songs.filter(song => song.server === 'netease');
-  const tencentSongs = songs.filter(song => song.server === 'tencent');
-
-  let html = '';
-
-  // 网易云歌单
-  if (neteaseSongs.length > 0) {
-    html += `
-      <div class="music-playlist-section">
-        <div class="music-playlist-header">🎵 网易云音乐 (${neteaseSongs.length})</div>
-        ${neteaseSongs.map(song => {
-          const originalIndex = songs.indexOf(song);
-          return songItemHTML(song, originalIndex);
-        }).join('')}
-      </div>
-    `;
-  }
-
-  // QQ音乐歌单
-  if (tencentSongs.length > 0) {
-    html += `
-      <div class="music-playlist-section">
-        <div class="music-playlist-header">🎶 QQ音乐 (${tencentSongs.length})</div>
-        ${tencentSongs.map(song => {
-          const originalIndex = songs.indexOf(song);
-          return songItemHTML(song, originalIndex);
-        }).join('')}
-      </div>
-    `;
-  }
-
-  if (!html) {
-    html = `
-      <div class="music-playlist-empty">
-        <div class="music-playlist-empty-icon">🎵</div>
-        <div class="music-playlist-empty-text">暂无歌曲</div>
-      </div>`;
-  }
-
-  container.innerHTML = html;
-  bindPlaylistClicks(container);
-  updatePlaylistHighlight();
-}
-
-/** 生成单首歌曲的 HTML */
-function songItemHTML(song, originalIndex) {
+/** 生成单首歌曲的 HTML（胶囊列表：序号 + 歌名 + 右侧歌手） */
+function songItemHTML(song, originalIndex, num) {
   return `
     <div class="music-playlist-item" data-index="${originalIndex}">
-      <img class="music-playlist-item-cover" src="${song.cover || 'https://picsum.photos/seed/music/100/100'}" alt="">
-      <div class="music-playlist-item-info">
-        <div class="music-playlist-item-title-wrapper">
-          <span class="music-playlist-item-title">${song.name}</span>
-        </div>
-        <span class="music-playlist-item-artist">${song.artist}</span>
-      </div>
+      <span class="mc-num">${num}</span>
+      <span class="music-playlist-item-title">${song.name}</span>
+      <span class="music-playlist-item-artist">${song.artist}</span>
     </div>`;
 }
 
@@ -526,11 +518,14 @@ async function initMusicPlayer() {
   // 事件绑定
   ap.on('play', updatePlayButton);
   ap.on('pause', updatePlayButton);
-  ap.on('timeupdate', () => { updateProgress(); updateLyrics(); });
+  ap.on('timeupdate', () => { updateProgress(); updateLyrics(); updateMiniLyric(); });
   ap.on('loadedmetadata', () => updateSongInfo());
   ap.on('listswitch', () => {
-    // 不在此处修改 audio.src，避免中断正在进行的 play() Promise
+    // 立即刷新封面/歌名/歌词：preload:'none' 下 loadedmetadata 要到播放后才触发，
+    // 不在此更新会导致「切歌后图片不显示、必须等播放」。
+    // 注意只更新 UI，不在此处修改 audio.src，避免中断正在进行的 play() Promise；
     // URL 刷新已在 playSongWithRefresh 中完成
+    updateSongInfo();
   });
 
   // 统一错误处理：APlayer error 事件
@@ -592,7 +587,6 @@ async function initMusicPlayer() {
     updatePlayButton();
     updatePlayModeButton();
     updatePlatformButton();
-    updatePlaylistHeader();
     renderPlaylist();
     initProgressDrag();
   }, 100);
@@ -615,15 +609,42 @@ function switchPlayMode() {
   updatePlayModeButton();
 }
 
+/**
+ * 面板宽度与 mini 胶囊实时同步（参考站 music-panel.js 的 syncPanelWidth）：
+ * 胶囊按内容自适应且播放中会伸展带出歌词行，面板取胶囊 offsetWidth（下限 260px），
+ * 由 ResizeObserver 驱动，展开/收起与伸展/收缩时面板始终与胶囊同宽。
+ */
+const MC_MIN_PANEL_WIDTH = 260;
+function syncPanelWidth() {
+  const mini = document.getElementById('mcMini');
+  const panel = document.getElementById('musicCapsule');
+  if (!mini || !panel) return;
+  const w = Math.max(mini.offsetWidth, MC_MIN_PANEL_WIDTH);
+  panel.style.width = w + 'px';
+}
+
 /** 绑定音乐模块事件 */
 function bindMusicEvents() {
+  // 封面图床加载失败 → 回退头像占位；src 已是占位图时不再赋值，防止 error 死循环
+  ['musicCover', 'musicCoverMini'].forEach((id) => {
+    const img = document.getElementById(id);
+    img?.addEventListener('error', () => {
+      const fb = coverFallbackSrc();
+      if (img.src !== fb) {
+        img.src = fb;
+        console.warn('[Music] 封面加载失败，已回退头像占位:', id);
+      }
+    });
+  });
+
   document.getElementById('musicPrev')?.addEventListener('click', async () => {
     if (!ap) return;
     const prevIndex = (ap.list.index - 1 + ap.list.audios.length) % ap.list.audios.length;
     await playSongWithRefresh(prevIndex);
   });
 
-  document.getElementById('musicPlay')?.addEventListener('click', async () => {
+  // 播放/暂停（面板播放键与 mini 封面点击共用，参考站 .aplayer-button 行为）
+  async function togglePlay() {
     if (!ap) return;
     if (ap.paused) {
       try {
@@ -640,7 +661,9 @@ function bindMusicEvents() {
     } else {
       ap.pause();
     }
-  });
+  }
+
+  document.getElementById('musicPlay')?.addEventListener('click', togglePlay);
 
   document.getElementById('musicNext')?.addEventListener('click', async () => {
     if (!ap) return;
@@ -650,6 +673,115 @@ function bindMusicEvents() {
 
   document.getElementById('musicMode')?.addEventListener('click', switchPlayMode);
   document.getElementById('musicPlatform')?.addEventListener('click', switchPlatform);
+
+  // 悬浮层收起 / 展开两态
+  const float = document.getElementById('musicFloat');
+  const mini = document.getElementById('mcMini');
+  const panelToggle = document.getElementById('mcListToggle');
+
+  function setFloatState(state) {
+    if (!float) return;
+    float.setAttribute('data-state', state);
+    const full = state === 'full';
+    mini?.setAttribute('aria-expanded', String(full));
+    mini?.setAttribute('aria-label', full ? '收起音乐播放器' : '展开音乐播放器');
+    // 展开成完整胶囊时默认带出歌单面板；收起时一并复位
+    if (panelToggle) {
+      panelToggle.classList.toggle('active', full);
+      panelToggle.setAttribute('aria-expanded', String(full));
+    }
+    document.getElementById('mcPanel')?.classList.toggle('open', full);
+    if (full) updateLyrics();
+    console.debug('[Music] float state →', state);
+  }
+
+  // mini 在展开态依然保留在卡片下方，故点击它兼作「收起」
+  mini?.addEventListener('click', () => {
+    setFloatState(float.getAttribute('data-state') === 'full' ? 'mini' : 'full');
+  });
+
+  // 参考站 .aplayer-button pointer-events:all —— 点击 mini 封面（含播放角标）切换播放/暂停，
+  // stopPropagation 避免冒泡到胶囊本体触发展开/收起
+  mini?.querySelector('.mc-mini-cover')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePlay();
+  });
+
+  // 面板宽度跟随胶囊（参考站同款 ResizeObserver）；先同步一次保证首帧正确
+  syncPanelWidth();
+  if (window.ResizeObserver && mini) {
+    new ResizeObserver(syncPanelWidth).observe(mini);
+  }
+  /**
+   * 收起方式：点击胶囊以外的空白处（原 #mcCollapse 按钮与封面收起入口均已移除）。
+   * 用 pointerdown 而非 click——拖动进度条时指针可能在胶囊外抬起，click 会落在
+   * 共同祖先（body）上被误判成「点击空白」，pointerdown 的起点在胶囊内则不受影响。
+   */
+  document.addEventListener('pointerdown', (e) => {
+    if (!float || float.getAttribute('data-state') !== 'full') return;
+    if (e.target.closest && e.target.closest('.music-float')) return;
+    setFloatState('mini');
+  });
+  // 键盘可达性：Esc 同样收起
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && float && float.getAttribute('data-state') === 'full') setFloatState('mini');
+  });
+
+  // 面板展开/收起
+  const listToggle = document.getElementById('mcListToggle');
+  const panel = document.getElementById('mcPanel');
+  listToggle?.addEventListener('click', () => {
+    const open = panel?.classList.toggle('open');
+    listToggle.classList.toggle('active', !!open);
+    listToggle.setAttribute('aria-expanded', String(!!open));
+  });
+
+  // 歌单 / 歌词选项卡
+  document.querySelectorAll('.mc-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const name = tab.dataset.tab;
+      document.querySelectorAll('.mc-tab').forEach(t => {
+        const on = t === tab;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', String(on));
+      });
+      document.querySelectorAll('.mc-pane').forEach(p => {
+        p.classList.toggle('active', p.dataset.pane === name);
+      });
+      // 面板隐藏期间歌词无法滚动，切回时立即跟一次
+      if (name === 'lyrics') updateLyrics();
+    });
+  });
+
+  // 音量控制
+  const volume = document.getElementById('musicVolume');
+  const muteBtn = document.getElementById('musicMute');
+  const muteIcon = muteBtn?.querySelector('i');
+  let lastVolume = 0.7;
+
+  function paintVolume(v) {
+    if (volume) volume.style.setProperty('--vol', Math.round(v * 100) + '%');
+    if (muteIcon) muteIcon.className = v === 0 ? 'ri-volume-mute-fill' : 'ri-volume-up-fill';
+  }
+
+  volume?.addEventListener('input', () => {
+    if (!ap) return;
+    const v = parseInt(volume.value, 10) / 100;
+    ap.volume(v);
+    if (v > 0) lastVolume = v;
+    paintVolume(v);
+  });
+
+  muteBtn?.addEventListener('click', () => {
+    if (!ap || !volume) return;
+    const cur = parseInt(volume.value, 10) / 100;
+    const next = cur > 0 ? 0 : (lastVolume || 0.7);
+    ap.volume(next);
+    volume.value = String(Math.round(next * 100));
+    paintVolume(next);
+  });
+
+  paintVolume(0.7);
 }
 
 /** 初始化音乐模块 */
