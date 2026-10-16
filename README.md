@@ -15,7 +15,7 @@
 
 ## 技术栈
 - HTML + CSS + 原生 JavaScript
-- Vite ^5.4.0：本地开发与构建
+- 零构建依赖：本地预览与产物收集由 `scripts/` 下两个 Node 原生脚本完成
 - Remix Icon 4.1.0：图标库，类名以 `ri-*` 形式使用
 - APlayer：音乐播放器核心
 - Meting：音乐数据 API 封装
@@ -29,6 +29,10 @@
 - `js/main.js`：主题、导航、轮播、打字机、滚动动画等交互逻辑
 - `js/music.js`：音乐播放器实现、歌词解析、播放列表与拖动进度条
 - `img/`：图片资源，页面中使用 `/img/...` 访问
+- `scripts/serve.mjs`：零依赖静态服务器（开发预览与产物自检共用）
+- `scripts/build.mjs`：把源文件原样收集到 `dist/`，不做打包与哈希
+- `js/uptimerobot.js`：项目卡「维护热度」竖条的真实数据源（UptimeRobot 只读 API）
+- `mise.toml`：沙箱运行协议（Node 版本、dev/build/start 任务、部署产物目录）
 - `vercel.json`：Vercel 配置，包含 CSP、rewrite 和 headers
 - `netlify.toml`：Netlify 相关配置
 - `package.json`：脚本与依赖定义
@@ -139,22 +143,21 @@
 | 圆角大小 | `css/style.css` → `--radius-*` | 卡片和按钮圆角 |
 
 ## 本地开发与构建
-启动开发环境：
+项目零第三方依赖，无需安装任何包。启动本地预览：
 
 ```bash
-npm install
-npm run dev
+node scripts/serve.mjs --port 3015
 ```
 
-默认端口为 `3015`。
+默认端口为 `3015`（服务源码目录，改动刷新即生效）。
 
-构建生产包：
+收集生产静态产物：
 
 ```bash
-npm run build
+node scripts/build.mjs
 ```
 
-本项目可直接部署为静态站点，产物为 `dist/`。
+产物为 `dist/`，是源文件的原样拷贝（不做打包、哈希与转译），可直接拖到任意静态托管上线。
 
 ## 已知问题与经验总结
 
@@ -170,7 +173,7 @@ npm run build
 - `connect-src` 需要放宽至诗词 API / Meting API 所需域名，否则会出现请求失败
 
 ### 3. 适配与兼容性
-- Vite 在加载 `js/*.js` 时如果缺少 `type="module"`，会出现打包警告，但传统脚本顺序加载仍可正常运行
+- 全站脚本以传统 `<script>`（非 ESM）顺序加载，`js/music.js` 依赖 `js/main.js` 顶层声明的全局词法变量，**不要给它们加 `type="module"`**，否则模块作用域隔离会让音乐模块读不到配置而报错
 - 移动端需注意：
   - `.hero-socials` 加 `flex-wrap: wrap`
   - `.projects-carousel` / `.gallery-container` 需要支持横向滚动

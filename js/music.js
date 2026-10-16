@@ -75,7 +75,6 @@ async function fetchPlaylist(server, type, id) {
       if (!res.ok) throw new Error(`获取${server}歌单失败: ${res.status}`);
       const data = await res.json();
       if (data && data.length > 0) {
-        console.log(`[Music] 使用 API 源 ${i + 1}: ${apiUrl}`);
         return data
           .filter(item => item.url && item.url.trim() !== '')
           .map(item => {
@@ -283,7 +282,6 @@ async function updateSongInfo() {
   const cover = document.getElementById('musicCover');
   const name = document.getElementById('musicSongName');
   const artist = document.getElementById('musicArtist');
-  console.log('[Music] updateSongInfo →', song.name, '| cover:', song.cover || '(空，用头像兜底)');
   if (cover) cover.src = song.cover || coverFallbackSrc();
   if (name) name.textContent = song.name || '--';
   if (artist) artist.textContent = song.artist || '--';
@@ -325,7 +323,6 @@ function updateMiniLyric() {
   }
   if (el.textContent !== text) {
     el.textContent = text;
-    console.debug('[Music] mini lyric →', text);
   }
 }
 
@@ -692,7 +689,6 @@ function bindMusicEvents() {
     }
     document.getElementById('mcPanel')?.classList.toggle('open', full);
     if (full) updateLyrics();
-    console.debug('[Music] float state →', state);
   }
 
   // mini 在展开态依然保留在卡片下方，故点击它兼作「收起」

@@ -1,0 +1,22 @@
+#:schema https://schemas.mise.dev/config-schema.json
+
+[tools]
+node = "20"
+
+[tasks.install]
+description = "纯静态项目零依赖，无需安装"
+run = "node -e \"console.log('无第三方依赖，跳过安装')\""
+
+[tasks.dev]
+description = "启动零依赖静态预览（端口 3015）"
+run = "node scripts/serve.mjs --host 0.0.0.0 --port 3015"
+depends = ["install"]
+
+[tasks.build]
+description = "收集纯静态产物到 dist/"
+run = "node scripts/build.mjs"
+outputs = ["dist"]
+
+[meoo.deploy]
+mode = "static"
+output = "dist"

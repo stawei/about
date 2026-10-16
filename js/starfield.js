@@ -34,7 +34,6 @@
     } else if (count < current) {
       stars.length = count;
     }
-    console.debug('[Starfield] resize', W + 'x' + H, 'stars=' + stars.length, 'raw=' + window.innerWidth);
   }
 
   function rand(min, max) { return Math.random() * (max - min) + min; }

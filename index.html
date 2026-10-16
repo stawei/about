@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>浅小兮的个人主页</title>
   <meta name="description" content="浅小兮的个人主页" />
   <link rel="icon" type="image/webp" href="https://conversation.cdn.meoo.host/conversations/349158222827081728/image/2026-08-21/1787323301665-favicon_ico.webp?auth_key=ed05eada1c09a1ccc1cc6e669058d547a83f52466266792079ea3d0e3d7f7df4" />
@@ -23,6 +23,12 @@
 
   <!-- 主样式 -->
   <link rel="stylesheet" href="css/style.css">
+  <noscript>
+    <style>
+      /* 禁用 JS 时入场动画无法触发，直接显示全部内容 */
+      .reveal, .tl-item .tl-card, .tl-item .tl-dot { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
 
   <!-- 音乐播放器（延迟加载） -->
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -35,7 +41,7 @@
        ============================================================ -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <div class="nav-links" id="navLinks">
+      <div class="nav-links">
         <!-- 头像在胶囊首位，悬停显示名字 -->
         <a class="nav-link nav-avatar" data-target="hero">
           <img src="img/avatar.jpg" alt="头像" class="nav-avatar-img" />
@@ -81,7 +87,7 @@
     <div class="container">
       <!-- 头像 + 下方状态条（时间 · 地点） -->
       <div class="hero-avatar-wrap">
-        <!-- 【替换】头像图片 src（本地图片留在 HTML，构建时由 Vite 哈希；音乐封面回退取此 src） -->
+        <!-- 【替换】头像图片 src（本地图片留在 HTML，img/ 相对路径原样部署；音乐封面回退取此 src） -->
         <img class="hero-avatar" src="img/avatar.jpg" alt="头像" />
         <div class="hero-meta" aria-label="当前时间、来访地点与天气">
           <span id="heroTime">--:--</span>
@@ -163,10 +169,11 @@
       <div class="section-head reveal">
         <h2 class="section-title">项目</h2>
         <p class="section-subtitle">一些我做过的东西</p>
+        <span class="section-meta" id="projectsCount"></span>
       </div>
-      <!-- 项目轮播 - 横向滚动展示 -->
-      <div class="projects-carousel reveal" id="projectsCarousel">
-        <div class="projects-track" id="projectsTrack"></div>
+      <!-- 项目看板：条目行 + 活跃度竖条（内容由 js/main.js projectsData 渲染） -->
+      <div class="projects-board reveal">
+        <div class="projects-rows" id="projectsRows"></div>
       </div>
     </div>
   </section>
@@ -223,7 +230,7 @@
       </div>
       <div class="gallery-strip reveal">
         <!-- 【替换】图片清单：仅保留 img；标题/时间/分组角标与大图均由 js/main.js initGalleryLightbox 的 galleryData 注入 -->
-        <div class="gallery-track" id="galleryTrack">
+        <div class="gallery-track">
           <figure class="gallery-item"><img src="img/photos01.webp" alt="" loading="lazy" /></figure>
           <figure class="gallery-item"><img src="img/photos02.webp" alt="" loading="lazy" /></figure>
           <figure class="gallery-item"><img src="img/photos03.webp" alt="" loading="lazy" /></figure>
@@ -341,7 +348,7 @@
           </div>
         </div>
         <div class="mc-pane mc-pane-lyrics" data-pane="lyrics">
-          <div class="music-lyrics" id="musicLyrics">
+          <div class="music-lyrics">
             <div class="music-lyrics-content" id="musicLyricsContent">加载中...</div>
           </div>
         </div>
@@ -402,7 +409,8 @@
   <div class="aurora" aria-hidden="true"></div>
   <canvas id="universe" aria-hidden="true"></canvas>
 
-  <!-- 主脚本（data + main 合并） -->
+  <!-- 主脚本（data + main 合并）；热度数据模块先加载，main.js 渲染时消费 -->
+  <script src="js/uptimerobot.js"></script>
   <script src="js/main.js"></script>
   <script src="js/starfield.js"></script>
   <!-- 音乐模块（延迟加载） -->

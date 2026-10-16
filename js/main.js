@@ -3,7 +3,7 @@ const profileData = {
   name: '浅小兮',
   roles: ['一名开发者', '一名设计师', '一名终身学习者', '一名热爱生活的人'],
   // 社交链接单一数据源：Hero 胶囊与页脚「联系我」均由此渲染。
-  // 头像等本地图片仍留在 index.html —— Vite 构建会哈希 img/ 路径，JS 硬编码会生产 404
+  // 头像等本地图片仍留在 index.html，保持 img/ 相对路径由 HTML 单一处声明
   socials: [
     { key: 'github', icon: 'ri-github-fill', label: 'GitHub', href: 'https://github.com/stawei' },
     { key: 'bilibili', icon: 'ri-bilibili-fill', label: 'B站', href: 'https://space.bilibili.com/516107164' },
@@ -37,38 +37,40 @@ const introData = {
   tags: ['浅小兮', '千曦一梦', '多喜乐，常安宁', 'zxwlove', '@location', '相遇的刹那开始就注定了别离']
 };
 
+/* 项目卡片数据。热度竖条由 js/uptimerobot.js 按 demo 域名匹配 UptimeRobot 监控；
+   若某项目的线上域名与 demo 不一致（如走备用域名），加 heatHost: '监控里的域名' 手动指定 */
 const projectsData = [
   {
     cover: 'https://free.picui.cn/free/2026/08/22/6a892f855b0f4.png',
     name: '个人主页Home',
     desc: '这个参照github大神优化修改的项目，网站为zxwlove.cn备用线路为zxwlove.us.ci',
-    tech: ['Vue', 'Node.js', 'JavaScript'],
+    tech: ['Node.js'],
     github: 'https://github.com/stawei/home',
-    demo: 'https://zxwlove.us.ci'
+    demo: 'https://zxwlove.us.ci/'
   },
   {
     cover: 'https://free.picui.cn/free/2026/08/22/6a892b9dc13b5.png',
     name: 'Hexo-Blog',
     desc: '根据Hexo框架搭建的个人博客，展示了我的前端技能和内容创作能力。',
-    tech: ['Vue', 'Hexo', 'Docker'],
+    tech: ['Hexo'],
     github: 'https://github.com/stawei/hexo-blog',
-    demo: 'https://blog.zxwlove.us.ci'
+    demo: 'https://blog.zxwlove.us.ci/'
   },
   {
     cover: 'https://free.picui.cn/free/2026/08/22/6a892ec572f60.png',
     name: '关于我',
     desc: '一个简单的自我介绍页面。',
-    tech: ['HTML', 'JavaScript', 'CSS'],
+    tech: ['JavaScript'],
     github: 'https://github.com/stawei/about',
-    demo: 'https://zxwlove.cc.cd'
+    demo: 'https://zxwlove.cc.cd/'
   },
   {
     cover: 'https://free.picui.cn/free/2026/08/22/6a89311a517fd.png',
     name: 'Starlight',
     desc: '个人设计的Blog',
-    tech: ['Vite', 'Vue3', 'Starlight'],
+    tech: ['Starlight'],
     github: 'https://github.com/stawei/Starlight',
-    demo: 'https://zxwlove.xyz'
+    demo: 'https://zxwlove.xyz/'
   }
 ];
 
@@ -82,7 +84,7 @@ const timelineData = [
 ];
 
 const musicConfig = {
-  // 多平台歌单配置
+  // 多平台歌单配置（播放器主题色由 CSS 变量控制，此处仅数据源）
   playlists: [
     {
       server: 'netease',  // 网易云音乐
@@ -96,9 +98,7 @@ const musicConfig = {
       id: '1171747653',   // QQ音乐歌单ID
       name: 'QQ音乐歌单'
     }
-  ],
-  theme: '#1989fa',
-  themeDark: '#4d8dff'
+  ]
 };
 
 /* ============================================================
@@ -120,11 +120,6 @@ const musicConfig = {
     var next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
-    // 同步 APlayer 主题色
-    var apTheme = next === 'dark' ? '#4d8dff' : '#1989fa';
-    document.querySelectorAll('meting-js').forEach(function (el) {
-      el.setAttribute('theme', apTheme);
-    });
   }
 
   /* ============================================================
@@ -277,39 +272,98 @@ const musicConfig = {
   }
 
   /* ============================================================
-     9. 项目渲染（使用 projectsData）- 双份渲染实现无缝循环
+     9. 项目渲染（使用 projectsData）- 看板条目 + 活跃度竖条
      ============================================================ */
-  function renderProjects() {
-    var track = document.getElementById('projectsTrack');
-    if (!track) return;
-    var data = (typeof projectsData !== 'undefined' && projectsData.length) ? projectsData : [];
-    if (data.length === 0) return;
 
-    // 生成单个项目卡片的HTML
-    function createCardHtml(p) {
-      var techHtml = p.tech.map(function (t) {
-        return '<span class="tech-tag">' + t + '</span>';
-      }).join('');
-      return (
-        '<div class="project-card">' +
-          '<div class="project-cover"><img src="' + p.cover + '" alt="' + p.name + '" loading="lazy" /></div>' +
-          '<div class="project-body">' +
-            '<h3 class="project-name">' + p.name + '</h3>' +
-            '<p class="project-desc">' + p.desc + '</p>' +
-            '<div class="project-tech">' + techHtml + '</div>' +
-            '<div class="project-links">' +
-              '<a class="project-btn btn-primary" href="' + p.github + '" target="_blank">GitHub</a>' +
-              '<a class="project-btn btn-ghost" href="' + p.demo + '" target="_blank">Demo</a>' +
-            '</div>' +
-          '</div>' +
-        '</div>'
-      );
+  /**
+   * 兜底热度：以项目名为种子生成稳定的 12 段强度值（对应近 12 个月）。
+   * 仅在 UptimeRobot 未覆盖该项目（js/uptimerobot.js 未命中监控域名）时使用，
+   * 同一名称每次渲染结果一致，不会随刷新跳动。
+   */
+  function projectActivity(seed) {
+    var h = 2166136261;
+    for (var i = 0; i < seed.length; i++) {
+      h ^= seed.charCodeAt(i);
+      h = (h * 16777619) >>> 0;
+    }
+    var out = [];
+    for (var m = 0; m < 12; m++) {
+      h = (h * 1664525 + 1013904223) >>> 0;
+      var noise = (h % 1000) / 1000;
+      // 越靠近当前月份越强，营造「仍在维护」的趋势
+      var trend = 0.5 + (m / 11) * 0.5;
+      out.push(Math.min(1, 0.18 + noise * 0.5 + trend * 0.32));
+    }
+    return out;
+  }
+
+  function renderProjects() {
+    var rows = document.getElementById('projectsRows');
+    if (!rows) return;
+    var data = (typeof projectsData !== 'undefined' && projectsData.length) ? projectsData : [];
+
+    var count = document.getElementById('projectsCount');
+    if (count) count.textContent = data.length ? '共 ' + data.length + ' 个' : '';
+
+    if (data.length === 0) {
+      rows.innerHTML = '<p class="projects-empty">项目整理中，稍后再来看看。</p>';
+      return;
     }
 
-    // 渲染双份卡片实现无缝循环
-    var cardsHtml = data.map(createCardHtml).join('');
-    var cardsHtmlDouble = cardsHtml + cardsHtml;
-    track.innerHTML = cardsHtmlDouble;
+    rows.innerHTML = data.map(function (p) {
+      var tech = p.tech || [];
+      var badges = tech.slice(0, 2).map(function (t) {
+        return '<span class="pr-badge">' + t + '</span>';
+      }).join('');
+      if (tech.length > 2) {
+        badges += '<span class="pr-badge pr-badge-more" title="' + tech.slice(2).join(' / ') + '">+' + (tech.length - 2) + '</span>';
+      }
+      // 真实数据优先：命中 UptimeRobot 监控域名时用逐月可用率，否则回落种子热度
+      var heat = (window.ProjectHeat && window.ProjectHeat.get) ? window.ProjectHeat.get(p) : null;
+      var values = heat ? heat.values : projectActivity(p.name);
+      var bars = values.map(function (v, i) {
+        var tip = '';
+        if (heat) {
+          tip = heat.uptimes[i] === null
+            ? heat.labels[i] + ' 无监控记录'
+            : heat.labels[i] + ' 可用率 ' + (Math.round(heat.uptimes[i] * 1000) / 10).toFixed(1) + '%';
+        }
+        return '<span class="pr-bar' + (v >= 0.72 ? ' is-active' : '') +
+               '" style="--o:' + v.toFixed(2) + '"' +
+               (tip ? ' title="' + tip + '"' : '') + '></span>';
+      }).join('');
+
+      var links =
+        (p.github ? '<a class="pr-link" href="' + p.github + '" target="_blank" rel="noopener noreferrer" title="查看源码" aria-label="' + p.name + ' 源码"><i class="ri-github-fill" aria-hidden="true"></i></a>' : '') +
+        (p.demo ? '<a class="pr-link" href="' + p.demo + '" target="_blank" rel="noopener noreferrer" title="访问站点" aria-label="' + p.name + ' 在线访问"><i class="ri-external-link-line" aria-hidden="true"></i></a>' : '');
+
+      return (
+        '<article class="project-row">' +
+          '<div class="pr-main">' +
+            (p.cover
+              ? (p.demo
+                  // 封面可点击直达项目站点；无 demo 的项目保持纯图片
+                  ? '<a class="pr-cover-link" href="' + p.demo + '" target="_blank" rel="noopener noreferrer" title="访问 ' + p.name + '" aria-label="' + p.name + ' 在线访问"><img class="pr-cover" src="' + p.cover + '" alt="" loading="lazy" /></a>'
+                  : '<img class="pr-cover" src="' + p.cover + '" alt="" loading="lazy" aria-hidden="true" />')
+              : '') +
+            '<div class="pr-text">' +
+              '<div class="pr-head">' +
+                '<h3 class="pr-name">' + p.name + '</h3>' +
+              '</div>' +
+              (p.desc ? '<p class="pr-desc">' + p.desc + '</p>' : '') +
+              (badges ? '<div class="pr-badges">' + badges + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="pr-side">' +
+            '<div class="pr-bars' + (heat ? ' is-live' : '') + '" aria-hidden="true">' + bars + '</div>' +
+            '<div class="pr-scale"><span>近 12 个月</span><span>' +
+              (heat ? heat.avgText : '维护热度') +
+            '</span></div>' +
+            (links ? '<div class="pr-links">' + links + '</div>' : '') +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
   }
 
   /* ============================================================
@@ -383,9 +437,6 @@ const musicConfig = {
       });
       if (locAnchor && !locAnchor.parentNode) tagsCard.appendChild(locAnchor);
     }
-
-    console.info('[intro] 由 introData 渲染完成：段落',
-      (data.paragraphs || []).length, '技能', (data.skills || []).length, '标签', (data.tags || []).length);
   }
 
   /* ============================================================
@@ -424,7 +475,7 @@ const musicConfig = {
     if (!list || !Array.isArray(profileData.socials)) return;
     list.textContent = '';
     ['email', 'github', 'qq'].forEach(function (key) {
-      var s = profileData.socials.filter(function (x) { return x.key === key; })[0];
+      var s = profileData.socials.find(function (x) { return x.key === key; });
       if (!s) return;
       var li = document.createElement('li');
       li.appendChild(makeSocialLink(s, {
@@ -433,7 +484,6 @@ const musicConfig = {
       }));
       list.appendChild(li);
     });
-    console.info('[socials] Hero 与页脚联系方式已由 profileData.socials 渲染');
   }
 
   /* ============================================================
@@ -625,7 +675,6 @@ const musicConfig = {
           poemEl.textContent = poem;
           // 移除光标，静置成一行普通诗词
           poemEl.classList.remove('poem-typewriter');
-          console.info('[poem] 打字完成，已停止循环:', poem);
           return;
         }
         poemEl.textContent = poem.substring(0, i++);
@@ -636,30 +685,48 @@ const musicConfig = {
   }
 
   /* ============================================================
-     11. 通用淡入动画 + 时间线滑入（load 后才观察，避免误触发）
+     11. 通用淡入动画 + 时间线滑入（DOM 就绪即观察，不等外链加载完）
      ============================================================ */
-  function initRevealAnimations() {
-    // 通用淡入
-    var revealObserver = new IntersectionObserver(function (entries) {
+  var revealObserver = null;
+
+  /* 共用淡入观察器：静态 HTML 与 JS 注入的卡片、时间线节点都走同一个实例 */
+  function getRevealObserver() {
+    if (revealObserver) return revealObserver;
+    if (!('IntersectionObserver' in window)) return null;
+    revealObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
           revealObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+    return revealObserver;
+  }
 
-    // 时间线节点单独观察
-    var tlObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          tlObserver.unobserve(entry.target);
+  function initRevealAnimations() {
+    var observer = getRevealObserver();
+    var targets = document.querySelectorAll('.reveal, .tl-item');
+    console.info('[reveal] 入场动画挂载：目标 ' + targets.length + ' 个，观察器' + (observer ? '可用' : '不可用（降级直接显示）'));
+    if (!observer) {
+      // 无 IntersectionObserver 时直接显示，绝不允许内容保持隐藏
+      targets.forEach(function (el) { el.classList.add('visible'); });
+      return;
+    }
+    targets.forEach(function (el) { observer.observe(el); });
+
+    // 兜底：异常情况下（观察器未回调、脚本被拦截）超时强制显示，避免区块永久空白
+    setTimeout(function () {
+      var forced = 0;
+      targets.forEach(function (el) {
+        if (!el.classList.contains('visible')) {
+          el.classList.add('visible');
+          observer.unobserve(el);
+          forced++;
         }
       });
-    }, { threshold: 0.15 });
-    document.querySelectorAll('.tl-item').forEach(function (el) { tlObserver.observe(el); });
+      if (forced) console.warn('[reveal] 兜底强制显示 ' + forced + ' 个元素（观察器未按时回调）');
+    }, 2500);
   }
 
 
@@ -672,6 +739,12 @@ const musicConfig = {
     bindDrawer();
     initTypewriter();
     renderProjects();
+    // 拉取 UptimeRobot 真实可用性数据后重绘热度竖条（失败静默，保留种子热度）
+    if (window.ProjectHeat && window.ProjectHeat.load) {
+      window.ProjectHeat.load().then(function (idx) {
+        if (idx) renderProjects();
+      });
+    }
     renderTimeline();
     renderIntro();
     renderSocials();
@@ -697,15 +770,17 @@ const musicConfig = {
     // 滚动高亮
     initSectionObserver();
 
+    // 淡入动画：DOM 就绪即挂载，不等外链（CDN 脚本/字体）加载完成
+    initRevealAnimations();
+
     // 窗口 resize 时重新定位指示条
     window.addEventListener('resize', function () {
       var active = document.querySelector('.nav-link.active');
       if (active) moveIndicator(active);
     });
 
-    // load 后启动淡入动画 + 初始指示条定位
+    // load 后仅定位初始指示条
     window.addEventListener('load', function () {
-      initRevealAnimations();
       var active = document.querySelector('.nav-link.active');
       if (active) moveIndicator(active);
     });
@@ -744,14 +819,13 @@ const musicConfig = {
 
     var totalImages = galleryData.length;
 
-    // 大图直接取卡片 img 已解析的 src：构建后是哈希 URL；
-    // 原先 data-full 硬编码 img/xxx.webp 在 dist（无 img 目录）会 404，一并去掉该重复属性
+    // 大图直接取卡片 img 已解析的 src，与角标声明保持同源，不重复写死 img/ 路径
     var galleryFullSrcs = Array.prototype.slice.call(galleryItems).slice(0, totalImages).map(function (item) {
       var img = item && item.querySelector('img');
       return img ? img.src : '';
     });
 
-    // 卡片角标（时间/名称/分组）由 galleryData 注入，index.html 不再重复硬编码
+    // 卡片角标（时间/名称）由 galleryData 注入，index.html 不再重复硬编码
     Array.prototype.slice.call(galleryItems).slice(0, totalImages).forEach(function (item, i) {
       var g = galleryData[i];
       if (!g || item.querySelector('.gi-name')) return;
@@ -763,12 +837,8 @@ const musicConfig = {
       var name = document.createElement('span');
       name.className = 'gi-name';
       name.textContent = g.title;
-      var tag = document.createElement('span');
-      tag.className = 'gi-tag';
-      tag.textContent = g.tag;
       item.appendChild(time);
       item.appendChild(name);
-      item.appendChild(tag);
     });
 
     // 更新全屏查看器内容
